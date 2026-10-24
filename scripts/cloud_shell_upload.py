@@ -65,21 +65,29 @@ def upload(project, root=ROOT, allow_billing_linked=False):
         if not shutil.which(executable):
             raise ValueError("Run this script inside Google Cloud Shell; missing " + executable)
     check_billing(project, allow_billing_linked)  # Unknown status still stops writes.
-    bq = ["bq", "--project_id=" + project, "--location=US", "--format=prettyjson"]
+    bq = ["bq", "--project_id=" + project, "--format=prettyjson"]
     datasets = command(bq + ["ls", "--max_results=10000", project + ":"], as_json=True)
     dataset_ids = {d["datasetReference"]["datasetId"] for d in (datasets or [])}
     desired = sorted({i["dataset"] for i in manifest["tables"]})
     existing = {}
+    locations = {}
     # Inspect every existing target before creating datasets or uploading files.
     for dataset in desired:
         if dataset not in dataset_ids:
             continue
         info = command(bq + ["show", project + ":" + dataset], as_json=True)
-        if info.get("location", "").upper() != "US":
-            raise ValueError(dataset + " is not in US. Stop and review locations before uploading.")
+        location = info.get("location")
+        if not isinstance(location, str) or not location.strip():
+            raise ValueError("Cannot determine dataset location: " + dataset)
+        locations[dataset] = location
         tables = command(bq + ["ls", "--max_results=10000", project + ":" + dataset], as_json=True)
         for entry in tables or []:
             existing[dataset, entry["tableReference"]["tableId"]] = True
+    if len({location.casefold() for location in locations.values()}) > 1:
+        raise ValueError("Existing raw datasets use different locations: " + str(locations) + ". No tables were changed.")
+    location = next(iter(locations.values()), "US")
+    bq.append("--location=" + location)
+    print("Dataset location: " + location + " (reused for all new datasets and loads)", flush=True)
     skipped = set()
     for item in manifest["tables"]:
         key = (item["dataset"], item["table"])

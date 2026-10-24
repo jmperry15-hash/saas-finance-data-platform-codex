@@ -1,11 +1,10 @@
 # Architecture and implementation decisions
 
-**Decision update — October 24, 2026:** the user approved continuing in the existing
-billing-linked project `saas-finance-learning-512616` after reporting billing is
-enabled. The no-billing requirement below is the original design, now superseded
-for that existing link. Keep workloads small and preserve data; this approval
-does not request other paid services or upgrades. The uploader has an explicit
-`--allow-billing-linked` option and does not change billing configuration.
+**Current decision — October 24, 2026:** the user subsequently disabled billing
+for `saas-finance-learning-512616`. The latest screenshot and uploader progress
+show that the no-billing gate now passes. Use the default uploader without
+`--allow-billing-linked`. The existing `raw_shared` dataset is outside US; the
+helper reads its exact location and uses it for new raw datasets and loads.
 
 This is the target design, not a list of already deployed components. Synthetic
 source generation and the local SQLite learning lab are implemented. Cloud
@@ -27,7 +26,8 @@ and constraints were checked October 24, 2026; recheck them at the cloud setup g
 5. **Streamlit**: read reporting models with a read-only identity, apply filters,
    cache small results, and present definitions and the last successful refresh.
 
-Use one BigQuery region (proposed: US) for all datasets. SQLite is a local SQL
+Use the existing raw dataset's location for all datasets (US was the original
+proposal, not the location actually chosen). SQLite is a local SQL
 learning lab, not an extra production service. BigQuery is an analytical warehouse;
 its key declarations are not a substitute for integrity tests. No Postgres,
 Supabase, Docker, Airflow, paid dbt platform, cloud object-storage bucket, or paid

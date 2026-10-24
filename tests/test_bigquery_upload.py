@@ -133,9 +133,41 @@ class UploadTests(unittest.TestCase):
         self.assertEqual(len(gcloud_calls), 1)
         self.assertEqual(gcloud_calls[0][1:4], ["billing", "projects", "describe"])
 
-    def test_wrong_region_stops_before_any_writes(self):
+    def test_existing_non_us_location_is_reused_for_all_writes(self):
         calls, fake = self.fake_cloud(wrong_region=True)
-        with patch.object(uploader.shutil, "which", return_value="tool"), patch.object(uploader, "command", side_effect=fake):
-            with self.assertRaisesRegex(ValueError, "not in US"):
+        with patch.object(uploader.shutil, "which", return_value="tool"), patch.object(uploader, "command", side_effect=fake), contextlib.redirect_stdout(io.StringIO()):
+            uploader.upload("test-project-123", self.bundle)
+        writes = [c for c in calls if "mk" in c or "load" in c]
+        self.assertEqual(len(writes), 17)
+        self.assertTrue(all("--location=EU" in c for c in writes))
+
+    def test_conflicting_existing_locations_stop_before_any_writes(self):
+        calls, fake = self.fake_cloud(wrong_region=True)
+
+        def conflicting(args, as_json=False):
+            if "ls" in args and args[-1] == "test-project-123:":
+                calls.append(args)
+                return [{"datasetReference": {"datasetId": name}} for name in ("raw_shared", "raw_netsuite")]
+            if "show" in args and args[-1] == "test-project-123:raw_netsuite":
+                calls.append(args)
+                return {"location": "US"}
+            return fake(args, as_json)
+
+        with patch.object(uploader.shutil, "which", return_value="tool"), patch.object(uploader, "command", side_effect=conflicting):
+            with self.assertRaisesRegex(ValueError, "different locations"):
+                uploader.upload("test-project-123", self.bundle)
+        self.assertFalse(any("mk" in c or "load" in c for c in calls))
+
+    def test_missing_location_stops_before_any_writes(self):
+        calls, fake = self.fake_cloud()
+
+        def missing(args, as_json=False):
+            if "show" in args and args[-1] == "test-project-123:raw_shared":
+                calls.append(args)
+                return {}
+            return fake(args, as_json)
+
+        with patch.object(uploader.shutil, "which", return_value="tool"), patch.object(uploader, "command", side_effect=missing):
+            with self.assertRaisesRegex(ValueError, "Cannot determine dataset location"):
                 uploader.upload("test-project-123", self.bundle)
         self.assertFalse(any("mk" in c or "load" in c for c in calls))

@@ -1,11 +1,10 @@
 # Milestone 3: BigQuery Sandbox, one step at a time
 
-**Updated direction:** you reported `billingEnabled: true` and explicitly chose
-to keep using `saas-finance-learning-512616` with its existing billing link.
-Continue with the [updated bulk-upload command](bigquery_bulk_upload.md).
-The unbilled setup steps and Sandbox limits below describe the original plan;
-they are not the current project's verified operating restrictions. Uploads and
-financial reconciliation are still pending. No new billing setup is needed.
+**Latest status:** you disabled billing for `saas-finance-learning-512616`, and
+the uploader now passes the billing check. It then stopped on the old US-only
+location restriction. The revised helper reuses your existing dataset location;
+continue with the [updated bulk-upload command](bigquery_bulk_upload.md), without
+the billing override. Cloud loading and financial reconciliation remain pending.
 
 **Faster upload option:** after your first table, use the
 [Cloud Shell bulk-upload guide](bigquery_bulk_upload.md) to load the remaining
@@ -88,7 +87,8 @@ The local query template has not yet been executed or dry-run in BigQuery.
 ## Remaining work in this milestone
 
 The bulk-upload package contains explicit schemas for the remaining 13 tables
-in `raw_netsuite`, `raw_salesforce`, `raw_workday`, and `raw_pigment`, all in US.
+in `raw_netsuite`, `raw_salesforce`, `raw_workday`, and `raw_pigment`, all in the
+same location as your existing raw dataset.
 After the batch succeeds, we will compare row counts and finance controls
 to SQLite, including the September Engineering personnel expense of $252,750.92.
 Full-source cloud loading, reconciliation, and query-cost inspection remain to

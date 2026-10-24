@@ -6,25 +6,24 @@ Cloud Shell includes Google's CLI tools; no installation is needed on your Mac.
 The helper has been tested locally with simulated commands, not against your
 Google account. Cloud authentication and successful jobs still need verification.
 
-**Current decision (October 24, 2026):** you confirmed `billingEnabled: true` for
-`saas-finance-learning-512616` and explicitly chose to continue with the existing
-billing account linked. Use `--allow-billing-linked` for this project. The helper
-does not attach, detach, or upgrade billing. Keeping usage small remains the goal;
-a billing-linked project is not protected by Sandbox's no-billing boundary.
+**Current status (October 24, 2026):** you disabled billing for
+`saas-finance-learning-512616`. The latest uploader run passes the billing check
+and stops on the original US-only location requirement. The updated helper now
+reuses your existing raw dataset's location. Do not use the billing override.
 
-## Continue from the billing-check stop
+## Continue from the location-check stop
 
 The data ZIP has already been extracted in Cloud Shell. Upload just the revised
 `scripts/cloud_shell_upload.py` from your Mac into the Cloud Shell home directory,
 using the same Upload menu. Then run:
 
 ```bash
-python3 cloud_shell_upload.py --bundle saas-finance-upload --project saas-finance-learning-512616 --allow-billing-linked --upload
+python3 cloud_shell_upload.py --bundle saas-finance-upload --project saas-finance-learning-512616 --upload
 ```
 
 `--bundle` points the updated helper at your already-extracted CSVs and schemas.
-There is no need to extract the old ZIP again. The earlier failed run stopped
-before creating datasets or loading tables. Cloud execution remains unverified.
+There is no need to extract the old ZIP again. Earlier failed runs stopped before
+creating datasets or loading tables. Successful cloud loading remains unverified.
 
 ## Your steps
 
@@ -38,7 +37,7 @@ before creating datasets or loading tables. Cloud execution remains unverified.
 
 ```bash
 unzip -n saas-finance-upload.zip
-python3 saas-finance-upload/cloud_shell_upload.py --project saas-finance-learning-512616 --allow-billing-linked --upload
+python3 saas-finance-upload/cloud_shell_upload.py --project saas-finance-learning-512616 --upload
 ```
 
 This project's default ZIP expands into `saas-finance-upload/`. If that folder
@@ -54,9 +53,12 @@ the existing link; it does not bypass unknown status or authorize new upgrades.
 - Verifies the packaged CSV/schema fingerprints and limits the synthetic batch
   to 14 tables and at most 25 MiB of CSV data (currently about 1.9 MB).
 - Reads billing status. The default requires an unlinked project; the explicit
-  `--allow-billing-linked` option accepts your existing link. Unknown status stops.
-- Checks existing destination datasets are in US, then creates missing raw
-  datasets with a 60-day default table expiration.
+  `--allow-billing-linked` option is available only for a deliberately approved
+  linked project; it is not needed now. Unknown status stops.
+- Reads existing raw dataset locations and reuses their common location for new
+  datasets and loads. If none exist it defaults to US. Missing metadata or
+  conflicting existing locations stop the run. New datasets have a 60-day
+  default table expiration; no existing dataset is moved or deleted.
 - Checks any existing target table's column definitions and row count before
   any cloud writes. A correct departments table is skipped. An incorrect header
   import stops the batch so you can fix it first.
