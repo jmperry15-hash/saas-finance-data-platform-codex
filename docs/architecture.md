@@ -7,8 +7,10 @@ show that the no-billing gate now passes. Use the default uploader without
 helper reads its exact location and uses it for new raw datasets and loads.
 
 This is the target design, not a list of already deployed components. Synthetic
-source generation and the local SQLite learning lab are implemented. Cloud
-components remain planned. Sources
+source generation, the SQLite lab, and the first local Pandas exercise are implemented.
+User-provided Cloud Shell output confirms all 14 raw BigQuery tables loaded in
+`us-south1`; the user confirmed the GL row count and debit/credit totals with SQL.
+dbt, the reusable Python cloud loader, mock API, automation, and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
 
 ## Storage and transformation layers

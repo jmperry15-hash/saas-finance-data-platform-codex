@@ -4,6 +4,7 @@ import contextlib
 import io
 import json
 import shutil
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -16,6 +17,40 @@ from src.synthetic.generate import ROOT, generate, load_config, write_tables
 
 
 class UploadTests(unittest.TestCase):
+    def test_successful_empty_bq_listing_is_empty_list(self):
+        result = subprocess.CompletedProcess(["bq"], 0, stdout="\n")
+        with patch.object(uploader.subprocess, "run", return_value=result):
+            self.assertEqual(uploader.command(["bq", "ls", "test-project:raw_shared"], as_json=True), [])
+
+    def test_empty_billing_or_show_response_still_stops(self):
+        for args in (["gcloud", "billing", "projects", "describe", "test-project"], ["bq", "show", "test-project:raw_shared"]):
+            with self.subTest(args=args), patch.object(uploader.subprocess, "run", return_value=subprocess.CompletedProcess(args, 0, stdout="")):
+                with self.assertRaisesRegex(ValueError, "Expected JSON from.*") as error:
+                    uploader.command(args, as_json=True)
+                self.assertIn(" ".join(args), str(error.exception))
+
+    def test_failed_empty_listing_does_not_become_success(self):
+        with patch.object(uploader.subprocess, "run", side_effect=subprocess.CalledProcessError(1, ["bq"], output="")):
+            with self.assertRaisesRegex(ValueError, "bq failed"):
+                uploader.command(["bq", "ls"], as_json=True)
+
+    def test_non_json_listing_preserves_diagnostic(self):
+        result = subprocess.CompletedProcess(["bq"], 0, stdout="Unexpected CLI message")
+        with patch.object(uploader.subprocess, "run", return_value=result):
+            with self.assertRaisesRegex(ValueError, "Unexpected CLI message"):
+                uploader.command(["bq", "ls"], as_json=True)
+
+    def test_command_surfaces_captured_error(self):
+        failure = subprocess.CalledProcessError(1, ["bq"], output="BigQuery error: example load failure")
+        with patch.object(uploader.subprocess, "run", side_effect=failure):
+            with self.assertRaisesRegex(ValueError, "example load failure"):
+                uploader.command(["bq", "load"])
+
+    def test_command_still_parses_successful_json(self):
+        result = subprocess.CompletedProcess(["bq"], 0, stdout='{"location": "us-south1"}')
+        with patch.object(uploader.subprocess, "run", return_value=result):
+            self.assertEqual(uploader.command(["bq", "show"], as_json=True), {"location": "us-south1"})
+
     @classmethod
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
@@ -116,6 +151,9 @@ class UploadTests(unittest.TestCase):
         self.assertTrue(all("--skip_leading_rows=1" in c and "--max_bad_records=0" in c for c in loads))
         self.assertFalse(any("--replace" in arg or "enable" == arg or "delete" == arg for c in calls for arg in c))
         self.assertEqual(sum("mk" in c for c in calls), 4)
+        for creation in (c for c in calls if "mk" in c):
+            self.assertIn("--default_table_expiration=5097600", creation)
+            self.assertIn("--default_partition_expiration=5097600", creation)
 
     def test_existing_bad_header_import_stops_before_any_writes(self):
         calls, fake = self.fake_cloud(mismatch=True)

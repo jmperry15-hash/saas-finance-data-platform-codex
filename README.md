@@ -9,13 +9,14 @@ reuses the existing raw dataset location instead of requiring US; see the
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
 relational data, BigQuery, dbt, automation, and Streamlit.
 
-**Status: milestone 1 complete; milestone 2 SQL lab verified; milestone 3 setup started.** The
-synthetic source generator, local SQLite database, SQL lessons, validation, tests,
-and documentation are implemented. Cloud ingestion, dbt, APIs, Actions, and the
-dashboard are planned. BigQuery's first-table schema and setup guide are prepared;
-cloud execution remains unverified. A [Cloud Shell upload bundle](docs/bigquery_bulk_upload.md)
-is available to avoid repeating manual forms for the remaining tables. All company and person records
-are fictional. There are no source-system integrations or credentials.
+**Status: BigQuery uploads and GL control verified; milestone 4 Pandas exercise ready.**
+The user's Cloud Shell output confirms all 14 tables loaded in `us-south1`, with
+matching schemas and row counts. The user also confirmed 16,648 GL lines and
+$77,741,040.10 per side, with zero difference, through BigQuery SQL.
+Query-cost review and detailed cloud revenue/payroll reconciliation remain open.
+The [first Pandas exercise](docs/milestone_04.md) is implemented and tested locally.
+The reusable Python cloud loader, mock API, dbt, Actions, and dashboard remain planned.
+All company and person records are fictional. There are no live source-system integrations.
 
 ## Proposed architecture
 
@@ -58,16 +59,15 @@ Finish and understand each gate before starting the next milestone.
 | --- | --- | --- | --- |
 | **1. Synthetic sources — complete** | Shared IDs, customer contracts, workforce, GL, budgets/forecasts; validation | Read a Python function, change a seed, trace a record | Reproducible exports, balanced journals, cross-system reconciliations and fault tests pass |
 | **2. Relational SQL — lab ready** | CSVs loaded into local SQLite; eight SQL lessons | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Technical checks pass; complete the guided practice before moving on |
-| **3. BigQuery Sandbox — setup started** | Unbilled project setup guide and first-table schema ready; cloud steps pending | Datasets, schemas, warehouse vs operational DB, dry runs | Sandbox visible, billing absent, row counts reconcile, query estimate understood |
-| 4. Python ingestion and API practice | Explicit schema batch loader, Pandas cleanup, local paginated mock API | Types, API responses, retries, idempotency, logging | Repeat load gives same rows, malformed input and failed API pages stop the job |
+| **3. BigQuery Sandbox — uploads and GL verified** | All 14 raw tables loaded; user confirmed GL SQL totals | Datasets, schemas, warehouse vs operational DB, dry runs | Row counts and GL pass; query-cost review and detailed finance checks remain |
+| **4. Python ingestion and API practice — started** | Local Pandas GL exercise ready; reusable cloud loader and mock API next | Types, API responses, retries, idempotency, logging | Local Pandas checks pass; cloud rerun and API failure tests remain |
 | 5. dbt Core | Sources, staging views, finance models and tests | `ref`, `source`, SQL dependencies, tests, documentation | All tests pass; P&L, ARR and payroll reconcile to raw sources |
 | 6. GitHub Actions | CI first; manual refresh next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The current step is [milestone 3 Sandbox setup](docs/milestone_03.md), following
-your SQLite filtering and aggregation practice. The other SQL lessons remain
-available for learning. Your screenshots show the Google project and `raw_shared`
-dataset; this agent has not created cloud resources or verified the completed uploads.
+The current exercise is [milestone 4, step 1](docs/milestone_04.md): read and validate
+the GL with Pandas on your Mac. Cloud progress is evidenced by user screenshots
+and SQL confirmations; the agent has no local authenticated cloud connection.
 
 ## Folder structure
 
@@ -153,8 +153,10 @@ python -m src.database.query --file sql/lessons/01_select.sql
 Follow [the SQL walkthrough](docs/milestone_02.md) one lesson at a time. It
 explains the statements, gives expected results and small exercises, and shows
 how to load a new database after cloning. No package installation is required.
-The complete test suite now includes 30 tests, including eleven offline checks of
-the bulk-upload helper. Offline checks do not establish successful cloud uploads.
+The complete test suite now includes 42 tests, including seventeen offline checks
+of the bulk-upload helper and six Pandas checks. Run the full suite with
+`.venv-ingestion/bin/python -m unittest discover -s tests`; the original `.venv`
+has no Pandas. Offline checks do not establish successful cloud uploads.
 
 ## GitHub handoff
 
@@ -176,4 +178,4 @@ not paste a token into chat, a remote URL, or a source file. Public portfolio
 sharing is a later choice. No Actions workflow exists yet, so pushing this
 milestone does not trigger cloud refreshes or consume Actions minutes.
 
-Continue with [milestone 3 Sandbox setup](docs/milestone_03.md).
+Continue with [milestone 4: your first Pandas exercise](docs/milestone_04.md).

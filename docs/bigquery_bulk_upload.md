@@ -57,8 +57,8 @@ the existing link; it does not bypass unknown status or authorize new upgrades.
   linked project; it is not needed now. Unknown status stops.
 - Reads existing raw dataset locations and reuses their common location for new
   datasets and loads. If none exist it defaults to US. Missing metadata or
-  conflicting existing locations stop the run. New datasets have a 60-day
-  default table expiration; no existing dataset is moved or deleted.
+  conflicting existing locations stop the run. New datasets have 59-day
+  default table and partition expiration; no existing dataset is moved or deleted.
 - Checks any existing target table's column definitions and row count before
   any cloud writes. A correct departments table is skipped. An incorrect header
   import stops the batch so you can fix it first.
@@ -76,9 +76,46 @@ There is no automatic retry, scheduling, dbt build, dashboard, or API extraction
 The helper does not manage/reset quotas or guarantee zero charges for a linked
 project. It performs metadata checks and batch loads, not analytical queries.
 The size cap is a local input safeguard, not a spending cap. New datasets retain
-the helper's 60-day default expiration; existing dataset settings are unchanged.
+the helper's 59-day defaults; existing dataset settings are unchanged by the uploader.
+
+## Repairing expiration defaults after disabling billing
+
+A project switched from linked billing to Sandbox may retain incompatible dataset
+defaults. The observed load error requires both defaults to be less than 60 days.
+For this project's five raw datasets, set both to 59 days (5,097,600 seconds):
+
+```bash
+(
+  for dataset in raw_shared raw_netsuite raw_salesforce raw_workday raw_pigment; do
+    bq update --dataset \
+      --default_table_expiration=5097600 \
+      --default_partition_expiration=5097600 \
+      "saas-finance-learning-512616:$dataset" || exit 1
+  done
+)
+```
+
+This changes defaults for newly created tables, not expiration on existing tables.
+Billing stays disabled. Once all five updates succeed, rerun the uploader with
+the existing bundle. These source tables are unpartitioned: their new table
+expiration is measured from creation, not from dates in the historical CSV rows.
 
 ## Local packaging and validation
+
+If a load fails, dataset containers may exist without tables. Inspect the latest
+jobs before retrying the upload (replace the project ID with yours):
+
+```bash
+bq --format=prettyjson ls --jobs=true --max_results=3 saas-finance-learning-512616
+```
+
+This reads job history only. Share the error details for diagnosis. The uploader
+now includes captured command output in failures; older uploaded copies may hide it.
+Successful empty `bq ls` output is treated as an empty list. Other missing or
+invalid JSON responses stop the run with the command and response included.
+If Cloud Shell still shows only `Expecting value: line 1 column 1`, upload the
+current `scripts/cloud_shell_upload.py` to your Cloud Shell home directory,
+replacing the older helper, and run it with `--bundle saas-finance-upload`.
 
 From the repository root, regenerate the bundle after source/helper changes:
 

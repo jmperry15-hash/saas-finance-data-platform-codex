@@ -16,8 +16,23 @@ ROOT = Path(__file__).resolve().parent
 
 
 def command(args, as_json=False):
-    result = subprocess.run(args, check=True, text=True, stdout=subprocess.PIPE)
-    return json.loads(result.stdout) if as_json else result.stdout
+    try:
+        result = subprocess.run(args, check=True, text=True, stdout=subprocess.PIPE)
+    except subprocess.CalledProcessError as exc:
+        # bq writes some failures to stdout, which otherwise disappears here.
+        detail = (exc.stdout or "").strip() or "See command error output above."
+        raise ValueError(f"{args[0]} failed (exit {exc.returncode}):\n{detail}") from exc
+    if not as_json:
+        return result.stdout
+    # A successful bq listing can print nothing when there are no resources.
+    # Only listings may use this fallback; billing and object details must parse.
+    if not result.stdout.strip() and args[0] == "bq" and "ls" in args:
+        return []
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        detail = result.stdout.strip() or "(empty response)"
+        raise ValueError("Expected JSON from " + " ".join(args) + "\nResponse: " + detail) from exc
 
 
 def check_billing(project, allow_billing_linked=False):
@@ -101,7 +116,9 @@ def upload(project, root=ROOT, allow_billing_linked=False):
         skipped.add(key)
     for dataset in desired:
         if dataset not in dataset_ids:
-            command(bq + ["mk", "--dataset", "--default_table_expiration=5184000", project + ":" + dataset])
+            # Sandbox requires both defaults. 59 days is below its 60-day limit.
+            command(bq + ["mk", "--dataset", "--default_table_expiration=5097600",
+                          "--default_partition_expiration=5097600", project + ":" + dataset])
     for item in manifest["tables"]:
         key = (item["dataset"], item["table"])
         target = project + ":" + ".".join(key)

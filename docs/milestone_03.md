@@ -86,13 +86,20 @@ The local query template has not yet been executed or dry-run in BigQuery.
 
 ## Remaining work in this milestone
 
+Update, October 24, 2026: user-provided Cloud Shell output confirms all 14 tables
+loaded with matching schemas/counts in `us-south1`. The user confirmed the GL
+SQL count of 16,648 and totals of $77,741,040.10 on each side, difference $0.
+The five raw datasets now use 59-day table and partition defaults, applied by
+the user after disabling billing. The agent has not connected to the cloud directly.
+
 The bulk-upload package contains explicit schemas for the remaining 13 tables
 in `raw_netsuite`, `raw_salesforce`, `raw_workday`, and `raw_pigment`, all in the
 same location as your existing raw dataset.
 After the batch succeeds, we will compare row counts and finance controls
 to SQLite, including the September Engineering personnel expense of $252,750.92.
-Full-source cloud loading, reconciliation, and query-cost inspection remain to
-be completed with your actual project. Full Python/API ingestion is milestone 4.
+Full-source cloud loading and the GL grand-total check are complete. Detailed
+finance reconciliation and query-cost inspection remain open. The next local
+exercise is [Pandas validation](milestone_04.md); full Python/API ingestion is milestone 4.
 
 ## Free-only boundaries
 
