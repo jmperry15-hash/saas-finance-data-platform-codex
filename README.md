@@ -1,5 +1,10 @@
 # Miniature SaaS Finance Data Platform
 
+**Cloud decision, October 24, 2026:** you chose to continue with the existing
+billing-linked project `saas-finance-learning-512616`. The upload helper now
+supports that explicit choice; use the [updated continuation command](docs/bigquery_bulk_upload.md).
+Small usage remains the goal, but this is no longer the original unbilled Sandbox setup.
+
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
 relational data, BigQuery, dbt, automation, and Streamlit.
 
@@ -147,7 +152,7 @@ python -m src.database.query --file sql/lessons/01_select.sql
 Follow [the SQL walkthrough](docs/milestone_02.md) one lesson at a time. It
 explains the statements, gives expected results and small exercises, and shows
 how to load a new database after cloning. No package installation is required.
-The complete test suite now includes 25 tests, including six offline checks of
+The complete test suite now includes 28 tests, including nine offline checks of
 the bulk-upload helper. Offline checks do not establish successful cloud uploads.
 
 ## GitHub handoff

@@ -20,15 +20,22 @@ def command(args, as_json=False):
     return json.loads(result.stdout) if as_json else result.stdout
 
 
-def check_billing(project):
+def check_billing(project, allow_billing_linked=False):
     info = command(["gcloud", "billing", "projects", "describe", project,
                     "--format=json", "--quiet"], as_json=True)
-    if info.get("billingEnabled") is not False or info.get("billingAccountName"):
-        raise ValueError("Stop: project must have billing disabled and no linked billing account.")
+    if type(info.get("billingEnabled")) is not bool:
+        raise ValueError("Cannot determine billing status. Review the billing response before uploading.")
+    if info["billingEnabled"] or info.get("billingAccountName"):
+        if not allow_billing_linked:
+            raise ValueError("Project has linked billing. Use --allow-billing-linked only when you intend to use that project.")
+        print("Using your existing billing-linked project; billing settings will not be changed.", flush=True)
 
 
 def validate_bundle(root):
     manifest = json.loads((root / "upload_manifest.json").read_text())
+    if manifest.get("synthetic_only") is not True or len(manifest["tables"]) != 14:
+        raise ValueError("Expected the project's 14-table synthetic bundle")
+    total_bytes = 0
     for item in manifest["tables"]:
         for field, hash_field in [("file", "sha256"), ("schema", "schema_sha256")]:
             path = (root / item[field]).resolve()
@@ -36,6 +43,10 @@ def validate_bundle(root):
                 raise ValueError("Invalid bundle path")
             if hashlib.sha256(path.read_bytes()).hexdigest() != item[hash_field]:
                 raise ValueError("Bundle file changed: " + item[field])
+            if field == "file":
+                total_bytes += path.stat().st_size
+    if total_bytes > 25 * 1024 * 1024:
+        raise ValueError("Synthetic CSV batch exceeds the 25 MiB learning-project size limit")
     return manifest
 
 
@@ -46,14 +57,14 @@ def schema_matches(actual, expected):
     return normalized(actual) == normalized(expected)
 
 
-def upload(project, root=ROOT):
+def upload(project, root=ROOT, allow_billing_linked=False):
     if not re.fullmatch(r"[a-z][a-z0-9-]{4,28}[a-z0-9]", project):
         raise ValueError("Use your Google Cloud project ID, not its display name.")
     manifest = validate_bundle(root)
     for executable in ("gcloud", "bq"):
         if not shutil.which(executable):
             raise ValueError("Run this script inside Google Cloud Shell; missing " + executable)
-    check_billing(project)  # Failure or uncertain status stops all cloud writes.
+    check_billing(project, allow_billing_linked)  # Unknown status still stops writes.
     bq = ["bq", "--project_id=" + project, "--location=US", "--format=prettyjson"]
     datasets = command(bq + ["ls", "--max_results=10000", project + ":"], as_json=True)
     dataset_ids = {d["datasetReference"]["datasetId"] for d in (datasets or [])}
@@ -106,17 +117,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", required=True)
     parser.add_argument("--upload", action="store_true", help="Check billing and run cloud uploads")
+    parser.add_argument("--allow-billing-linked", action="store_true", help="Use an existing billing-linked project without changing its billing settings")
+    parser.add_argument("--bundle", type=Path, default=ROOT, help="Folder containing the extracted upload_manifest.json and source files")
     args = parser.parse_args()
     try:
-        manifest = validate_bundle(ROOT)
+        manifest = validate_bundle(args.bundle)
         if not args.upload:
             for item in manifest["tables"]:
                 print(f"{args.project}.{item['dataset']}.{item['table']}: {item['rows']} rows")
             print("Preview only. Add --upload to check billing and upload in Cloud Shell.")
             return
-        upload(args.project)
+        upload(args.project, args.bundle, args.allow_billing_linked)
     except (ValueError, KeyError, OSError, subprocess.CalledProcessError) as exc:
-        parser.exit(1, f"Stopped: {exc}\nDo not enable billing or APIs to bypass an error; share the error text for review.\n")
+        parser.exit(1, f"Stopped: {exc}\nShare the error text for review before changing project settings.\n")
 
 
 if __name__ == "__main__":

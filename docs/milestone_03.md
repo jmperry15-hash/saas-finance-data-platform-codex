@@ -1,5 +1,12 @@
 # Milestone 3: BigQuery Sandbox, one step at a time
 
+**Updated direction:** you reported `billingEnabled: true` and explicitly chose
+to keep using `saas-finance-learning-512616` with its existing billing link.
+Continue with the [updated bulk-upload command](bigquery_bulk_upload.md).
+The unbilled setup steps and Sandbox limits below describe the original plan;
+they are not the current project's verified operating restrictions. Uploads and
+financial reconciliation are still pending. No new billing setup is needed.
+
 **Faster upload option:** after your first table, use the
 [Cloud Shell bulk-upload guide](bigquery_bulk_upload.md) to load the remaining
 tables in one batch. The local ZIP and helper are prepared; cloud execution and

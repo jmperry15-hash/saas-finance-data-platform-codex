@@ -1,5 +1,12 @@
 # Architecture and implementation decisions
 
+**Decision update — October 24, 2026:** the user approved continuing in the existing
+billing-linked project `saas-finance-learning-512616` after reporting billing is
+enabled. The no-billing requirement below is the original design, now superseded
+for that existing link. Keep workloads small and preserve data; this approval
+does not request other paid services or upgrades. The uploader has an explicit
+`--allow-billing-linked` option and does not change billing configuration.
+
 This is the target design, not a list of already deployed components. Synthetic
 source generation and the local SQLite learning lab are implemented. Cloud
 components remain planned. Sources

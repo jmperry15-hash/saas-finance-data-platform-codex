@@ -64,7 +64,28 @@ class UploadTests(unittest.TestCase):
                     uploader.upload("test-project-123", self.bundle)
                 self.assertEqual(command.call_count, 1)
 
-    def fake_cloud(self, mismatch=False, wrong_region=False):
+    def test_opt_in_still_rejects_unknown_billing(self):
+        with patch.object(uploader, "command", return_value={}):
+            with self.assertRaisesRegex(ValueError, "Cannot determine billing"):
+                uploader.check_billing("test-project-123", allow_billing_linked=True)
+
+    def test_size_limit_applies_with_billing_opt_in(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "bundle"
+            shutil.copytree(self.bundle, target)
+            manifest_path = target / "upload_manifest.json"
+            manifest = json.loads(manifest_path.read_text())
+            item = manifest["tables"][0]
+            content = b"x" * (25 * 1024 * 1024)
+            (target / item["file"]).write_bytes(content)
+            item["sha256"] = uploader.hashlib.sha256(content).hexdigest()
+            manifest_path.write_text(json.dumps(manifest))
+            with patch.object(uploader, "command") as command:
+                with self.assertRaisesRegex(ValueError, "25 MiB"):
+                    uploader.upload("test-project-123", target, allow_billing_linked=True)
+                command.assert_not_called()
+
+    def fake_cloud(self, mismatch=False, wrong_region=False, billing_enabled=False):
         manifest = uploader.validate_bundle(self.bundle)
         by_target = {"test-project-123:" + i["dataset"] + "." + i["table"]: i for i in manifest["tables"]}
         calls = []
@@ -72,7 +93,7 @@ class UploadTests(unittest.TestCase):
         def fake(args, as_json=False):
             calls.append(args)
             if args[0] == "gcloud":
-                return {"billingEnabled": False, "billingAccountName": ""}
+                return {"billingEnabled": billing_enabled, "billingAccountName": "billingAccounts/test" if billing_enabled else ""}
             if "ls" in args:
                 if args[-1] == "test-project-123:":
                     return [{"datasetReference": {"datasetId": "raw_shared"}}]
@@ -102,6 +123,15 @@ class UploadTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "different schema or row count"):
                 uploader.upload("test-project-123", self.bundle)
         self.assertFalse(any("mk" in c or "load" in c for c in calls))
+
+    def test_explicit_billing_opt_in_loads_without_changing_billing(self):
+        calls, fake = self.fake_cloud(billing_enabled=True)
+        with patch.object(uploader.shutil, "which", return_value="tool"), patch.object(uploader, "command", side_effect=fake), contextlib.redirect_stdout(io.StringIO()):
+            uploader.upload("test-project-123", self.bundle, allow_billing_linked=True)
+        self.assertEqual(sum("load" in c for c in calls), 13)
+        gcloud_calls = [c for c in calls if c[0] == "gcloud"]
+        self.assertEqual(len(gcloud_calls), 1)
+        self.assertEqual(gcloud_calls[0][1:4], ["billing", "projects", "describe"])
 
     def test_wrong_region_stops_before_any_writes(self):
         calls, fake = self.fake_cloud(wrong_region=True)

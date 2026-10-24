@@ -6,6 +6,26 @@ Cloud Shell includes Google's CLI tools; no installation is needed on your Mac.
 The helper has been tested locally with simulated commands, not against your
 Google account. Cloud authentication and successful jobs still need verification.
 
+**Current decision (October 24, 2026):** you confirmed `billingEnabled: true` for
+`saas-finance-learning-512616` and explicitly chose to continue with the existing
+billing account linked. Use `--allow-billing-linked` for this project. The helper
+does not attach, detach, or upgrade billing. Keeping usage small remains the goal;
+a billing-linked project is not protected by Sandbox's no-billing boundary.
+
+## Continue from the billing-check stop
+
+The data ZIP has already been extracted in Cloud Shell. Upload just the revised
+`scripts/cloud_shell_upload.py` from your Mac into the Cloud Shell home directory,
+using the same Upload menu. Then run:
+
+```bash
+python3 cloud_shell_upload.py --bundle saas-finance-upload --project saas-finance-learning-512616 --allow-billing-linked --upload
+```
+
+`--bundle` points the updated helper at your already-extracted CSVs and schemas.
+There is no need to extract the old ZIP again. The earlier failed run stopped
+before creating datasets or loading tables. Cloud execution remains unverified.
+
 ## Your steps
 
 1. In Google Cloud Console, click **Activate Cloud Shell** (the `>_` icon near the
@@ -18,7 +38,7 @@ Google account. Cloud authentication and successful jobs still need verification
 
 ```bash
 unzip -n saas-finance-upload.zip
-python3 saas-finance-upload/cloud_shell_upload.py --project saas-finance-learning-512616 --upload
+python3 saas-finance-upload/cloud_shell_upload.py --project saas-finance-learning-512616 --allow-billing-linked --upload
 ```
 
 This project's default ZIP expands into `saas-finance-upload/`. If that folder
@@ -26,13 +46,15 @@ already exists from an earlier bundle, use a fresh directory for a new bundle;
 `unzip -n` intentionally preserves existing files.
 
 To inspect the upload list without Google access, omit `--upload`.
-If Google requests billing or a paid trial, stop. If the script stops because it
-cannot read billing status, report the error; do not enable billing to fix it.
+If the script cannot read billing status, report the error. The opt-in permits
+the existing link; it does not bypass unknown status or authorize new upgrades.
 
 ## What the script does
 
-- Verifies the packaged CSV/schema fingerprints and checks that the target
-  project has billing disabled with no billing account linked.
+- Verifies the packaged CSV/schema fingerprints and limits the synthetic batch
+  to 14 tables and at most 25 MiB of CSV data (currently about 1.9 MB).
+- Reads billing status. The default requires an unlinked project; the explicit
+  `--allow-billing-linked` option accepts your existing link. Unknown status stops.
 - Checks existing destination datasets are in US, then creates missing raw
   datasets with a 60-day default table expiration.
 - Checks any existing target table's column definitions and row count before
@@ -49,9 +71,10 @@ The batch is not atomic across tables: earlier successful loads remain if a late
 one fails. A retry skips completed matching tables. A mismatch stops for review.
 There is no automatic retry, scheduling, dbt build, dashboard, or API extraction.
 
-This is designed for the project's roughly 1.9 MB of synthetic CSVs. Reuploads
-consume Sandbox's lifetime storage allowance; avoid unnecessary replacements.
-The helper does not manage or reset quotas. Keep the project unbilled.
+The helper does not manage/reset quotas or guarantee zero charges for a linked
+project. It performs metadata checks and batch loads, not analytical queries.
+The size cap is a local input safeguard, not a spending cap. New datasets retain
+the helper's 60-day default expiration; existing dataset settings are unchanged.
 
 ## Local packaging and validation
 
