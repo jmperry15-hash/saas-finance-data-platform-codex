@@ -1,6 +1,8 @@
 # Architecture and implementation decisions
 
-This is the target design, not a list of already deployed components. Sources
+This is the target design, not a list of already deployed components. Synthetic
+source generation and the local SQLite learning lab are implemented. Cloud
+components remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
 
 ## Storage and transformation layers

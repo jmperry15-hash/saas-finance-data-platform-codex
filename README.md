@@ -3,9 +3,10 @@
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
 relational data, BigQuery, dbt, automation, and Streamlit.
 
-**Status: milestone 1 complete locally.** Only the synthetic source generator,
-validation, tests, and documentation are implemented. Cloud ingestion, SQL labs,
-dbt, APIs, Actions, and the dashboard are planned. All company and person records
+**Status: milestone 1 complete; milestone 2 SQL lab ready for practice.** The
+synthetic source generator, local SQLite database, SQL lessons, validation, tests,
+and documentation are implemented. Cloud ingestion, dbt, APIs, Actions, and the
+dashboard are planned. All company and person records
 are fictional. There are no source-system integrations or credentials.
 
 ## Proposed architecture
@@ -48,15 +49,15 @@ Finish and understand each gate before starting the next milestone.
 | Milestone | What we implement | You practice | Gate |
 | --- | --- | --- | --- |
 | **1. Synthetic sources — complete** | Shared IDs, customer contracts, workforce, GL, budgets/forecasts; validation | Read a Python function, change a seed, trace a record | Reproducible exports, balanced journals, cross-system reconciliations and fault tests pass |
-| 2. Relational SQL | Load CSVs into local SQLite; small SQL exercise set | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Queries tie to milestone 1 control totals; duplicate joins are demonstrated and fixed |
+| **2. Relational SQL — lab ready** | CSVs loaded into local SQLite; eight SQL lessons | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Technical checks pass; complete the guided practice before moving on |
 | 3. BigQuery Sandbox | User creates an unbilled project; load one small table, then full sources | Datasets, schemas, warehouse vs operational DB, dry runs | Sandbox visible, billing absent, row counts reconcile, query estimate understood |
 | 4. Python ingestion and API practice | Explicit schema batch loader, Pandas cleanup, local paginated mock API | Types, API responses, retries, idempotency, logging | Repeat load gives same rows, malformed input and failed API pages stop the job |
 | 5. dbt Core | Sources, staging views, finance models and tests | `ref`, `source`, SQL dependencies, tests, documentation | All tests pass; P&L, ARR and payroll reconcile to raw sources |
 | 6. GitHub Actions | CI first; manual refresh next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The next step requires your review of milestone 1. No later milestone has been
-implemented automatically.
+The current step is your [milestone 2 SQL walkthrough](docs/milestone_02.md).
+Milestones 3–7 remain planned; no cloud resources have been created.
 
 ## Folder structure
 
@@ -69,11 +70,18 @@ saas-finance-data-platform/
 │   ├── schema.py                  # Tables, columns, keys, accounts, departments
 │   ├── generate.py                # Source generation and journal posting
 │   └── validate.py                # Read and reconcile saved CSVs
+├── src/database/                 # SQLite loader and read-only query runner
+├── sql/
+│   ├── schema.sql                # CREATE TABLE definitions and constraints
+│   └── lessons/                  # Eight commented SQL examples
 ├── tests/test_synthetic.py        # Reproducibility and deliberate failure tests
+├── tests/test_database.py         # Database constraints and finance SQL tests
 ├── docs/
 │   ├── architecture.md
 │   ├── data_dictionary.md
-│   └── milestone_01.md            # Your walkthrough and learning exercises
+│   ├── milestone_01.md            # Source data walkthrough
+│   └── milestone_02.md            # Guided SQL practice
+├── data/local/                    # SQLite database; ignored by Git
 ├── data/generated/               # Local only; ignored by Git
 │   ├── shared/
 │   ├── netsuite/
@@ -86,7 +94,7 @@ saas-finance-data-platform/
 ```
 
 Add these folders only in their respective milestones:
-`sql/`, `src/ingestion/`, `src/mock_api/`, `dbt/` (models/staging,
+`src/ingestion/`, `src/mock_api/`, `dbt/` (models/staging,
 models/intermediate, models/marts, tests), `.github/workflows/`, and `dashboard/`.
 There are intentionally no empty cloud configurations that imply working services.
 
@@ -123,9 +131,23 @@ ignored recursively. Default seed 42 reproduces identical source files under
 the same Python runtime and code. Hashes help compare runs; validation rechecks
 the actual CSV contents rather than trusting an old report.
 
+## Run milestone 2
+
+The local database has already been built and verified. Start with:
+
+```bash
+source .venv/bin/activate
+python -m src.database.query --file sql/lessons/01_select.sql
+```
+
+Follow [the SQL walkthrough](docs/milestone_02.md) one lesson at a time. It
+explains the statements, gives expected results and small exercises, and shows
+how to load a new database after cloning. No package installation is required.
+The complete test suite now includes 19 tests.
+
 ## GitHub handoff
 
-Local Git is initialized and milestone 1 is committed. A remote GitHub repository
+Local Git tracks the source generator and SQL lab. A remote GitHub repository
 is **not created or connected**. The connected GitHub tools do not offer repository
 creation, and the GitHub CLI is not installed here.
 
@@ -143,4 +165,4 @@ not paste a token into chat, a remote URL, or a source file. Public portfolio
 sharing is a later choice. No Actions workflow exists yet, so pushing this
 milestone does not trigger cloud refreshes or consume Actions minutes.
 
-Start with [the milestone 1 walkthrough](docs/milestone_01.md).
+Continue with [the milestone 2 SQL walkthrough](docs/milestone_02.md).
