@@ -7,7 +7,8 @@ relational data, BigQuery, dbt, automation, and Streamlit.
 synthetic source generator, local SQLite database, SQL lessons, validation, tests,
 and documentation are implemented. Cloud ingestion, dbt, APIs, Actions, and the
 dashboard are planned. BigQuery's first-table schema and setup guide are prepared;
-cloud setup and execution remain unverified. All company and person records
+cloud execution remains unverified. A [Cloud Shell upload bundle](docs/bigquery_bulk_upload.md)
+is available to avoid repeating manual forms for the remaining tables. All company and person records
 are fictional. There are no source-system integrations or credentials.
 
 ## Proposed architecture
@@ -59,7 +60,8 @@ Finish and understand each gate before starting the next milestone.
 
 The current step is [milestone 3 Sandbox setup](docs/milestone_03.md), following
 your SQLite filtering and aggregation practice. The other SQL lessons remain
-available for learning. No cloud resources have been created by this project.
+available for learning. Your screenshots show the Google project and `raw_shared`
+dataset; this agent has not created cloud resources or verified the completed uploads.
 
 ## Folder structure
 
@@ -145,7 +147,8 @@ python -m src.database.query --file sql/lessons/01_select.sql
 Follow [the SQL walkthrough](docs/milestone_02.md) one lesson at a time. It
 explains the statements, gives expected results and small exercises, and shows
 how to load a new database after cloning. No package installation is required.
-The complete test suite now includes 19 tests.
+The complete test suite now includes 25 tests, including six offline checks of
+the bulk-upload helper. Offline checks do not establish successful cloud uploads.
 
 ## GitHub handoff
 

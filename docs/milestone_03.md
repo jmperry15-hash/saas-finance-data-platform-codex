@@ -1,8 +1,15 @@
 # Milestone 3: BigQuery Sandbox, one step at a time
 
-**Status: local instructions and first-table schema prepared. No Google project,
-dataset, load, or query has been verified in the cloud.** The next action is your
-Google sign-in and unbilled project setup. No credentials are needed in chat.
+**Faster upload option:** after your first table, use the
+[Cloud Shell bulk-upload guide](bigquery_bulk_upload.md) to load the remaining
+tables in one batch. The local ZIP and helper are prepared; cloud execution and
+financial reconciliation remain pending. The screenshots establish the project
+ID `saas-finance-learning-512616` and the attempted departments upload, but do not
+verify billing status or the corrected upload's final result.
+
+**Status: local instructions and schemas prepared.** The project and `raw_shared`
+dataset are visible in your screenshots. Corrected-table validation, unbilled
+status, and full-source loading remain unverified. No credentials are needed in chat.
 
 You practiced filtering and aggregation in SQLite and requested the next
 milestone. The remaining SQL lessons are available as references; completing
@@ -73,12 +80,12 @@ The local query template has not yet been executed or dry-run in BigQuery.
 
 ## Remaining work in this milestone
 
-After the first table succeeds, we will prepare explicit schemas and load the
-remaining 13 tables into `raw_netsuite`, `raw_salesforce`, `raw_workday`, and
-`raw_pigment`, all in US. Then we will compare row counts and finance controls
+The bulk-upload package contains explicit schemas for the remaining 13 tables
+in `raw_netsuite`, `raw_salesforce`, `raw_workday`, and `raw_pigment`, all in US.
+After the batch succeeds, we will compare row counts and finance controls
 to SQLite, including the September Engineering personnel expense of $252,750.92.
-Full-source load instructions, cloud reconciliation, and query-cost inspection
-remain to be completed with your actual project. Python ingestion is milestone 4.
+Full-source cloud loading, reconciliation, and query-cost inspection remain to
+be completed with your actual project. Full Python/API ingestion is milestone 4.
 
 ## Free-only boundaries
 
