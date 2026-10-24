@@ -1,0 +1,12 @@
+{
+  "company": "Juniper Cloud (fictional)",
+  "seed": 42,
+  "start_month": "2024-10-01",
+  "months": 24,
+  "currency": "USD",
+  "opening_customers": 50,
+  "new_customers": 60,
+  "prospects": 20,
+  "opening_employees": 72,
+  "new_employees": 24
+}

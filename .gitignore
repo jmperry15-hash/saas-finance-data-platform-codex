@@ -1,0 +1,21 @@
+# Generated synthetic exports are reproducible; keep them out of Git.
+data/generated/
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+!.env.example
+credentials/
+secrets/
+*credentials*.json
+*service-account*.json
+*service_account*.json
+*.pem
+*.key
+profiles.yml
+.streamlit/secrets.toml
+target/
+dbt_packages/
+logs/
