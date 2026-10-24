@@ -3,10 +3,11 @@
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
 relational data, BigQuery, dbt, automation, and Streamlit.
 
-**Status: milestone 1 complete; milestone 2 SQL lab ready for practice.** The
+**Status: milestone 1 complete; milestone 2 SQL lab verified; milestone 3 setup started.** The
 synthetic source generator, local SQLite database, SQL lessons, validation, tests,
 and documentation are implemented. Cloud ingestion, dbt, APIs, Actions, and the
-dashboard are planned. All company and person records
+dashboard are planned. BigQuery's first-table schema and setup guide are prepared;
+cloud setup and execution remain unverified. All company and person records
 are fictional. There are no source-system integrations or credentials.
 
 ## Proposed architecture
@@ -50,14 +51,15 @@ Finish and understand each gate before starting the next milestone.
 | --- | --- | --- | --- |
 | **1. Synthetic sources — complete** | Shared IDs, customer contracts, workforce, GL, budgets/forecasts; validation | Read a Python function, change a seed, trace a record | Reproducible exports, balanced journals, cross-system reconciliations and fault tests pass |
 | **2. Relational SQL — lab ready** | CSVs loaded into local SQLite; eight SQL lessons | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Technical checks pass; complete the guided practice before moving on |
-| 3. BigQuery Sandbox | User creates an unbilled project; load one small table, then full sources | Datasets, schemas, warehouse vs operational DB, dry runs | Sandbox visible, billing absent, row counts reconcile, query estimate understood |
+| **3. BigQuery Sandbox — setup started** | Unbilled project setup guide and first-table schema ready; cloud steps pending | Datasets, schemas, warehouse vs operational DB, dry runs | Sandbox visible, billing absent, row counts reconcile, query estimate understood |
 | 4. Python ingestion and API practice | Explicit schema batch loader, Pandas cleanup, local paginated mock API | Types, API responses, retries, idempotency, logging | Repeat load gives same rows, malformed input and failed API pages stop the job |
 | 5. dbt Core | Sources, staging views, finance models and tests | `ref`, `source`, SQL dependencies, tests, documentation | All tests pass; P&L, ARR and payroll reconcile to raw sources |
 | 6. GitHub Actions | CI first; manual refresh next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The current step is your [milestone 2 SQL walkthrough](docs/milestone_02.md).
-Milestones 3–7 remain planned; no cloud resources have been created.
+The current step is [milestone 3 Sandbox setup](docs/milestone_03.md), following
+your SQLite filtering and aggregation practice. The other SQL lessons remain
+available for learning. No cloud resources have been created by this project.
 
 ## Folder structure
 
@@ -165,4 +167,4 @@ not paste a token into chat, a remote URL, or a source file. Public portfolio
 sharing is a later choice. No Actions workflow exists yet, so pushing this
 milestone does not trigger cloud refreshes or consume Actions minutes.
 
-Continue with [the milestone 2 SQL walkthrough](docs/milestone_02.md).
+Continue with [milestone 3 Sandbox setup](docs/milestone_03.md).
