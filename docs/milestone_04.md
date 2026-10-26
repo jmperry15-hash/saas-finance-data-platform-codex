@@ -63,9 +63,110 @@ Run the command, then locate `monthly.head(5)` in the script. It limits the outp
 to five months; all 24 months are still validated. Change it to `monthly.head(12)`
 and rerun to display twelve months. The grand totals should remain unchanged.
 
-Stop here until this feels clear. Next we will discuss a reusable Python BigQuery
-loader, rerun behavior, and authentication; then a local mock API and failure handling.
-Those components are not implemented by this step.
+The user completed this exercise on October 26, 2026 and displayed twelve months.
+Local authentication and the single-table Python loader are now ready. The mock
+API and a pipeline for refreshing all sources remain later exercises.
+
+## Step 2: local Google Cloud CLI and sign-in
+
+On October 26, Google Cloud CLI 590.0.1 was installed at
+`/Users/jackperry/google-cloud-sdk` from Google's official Apple Silicon archive.
+The archive SHA256 matched the published checksum. The installer added PATH and
+completion entries to `~/.zshrc`, with its backup at `~/.zshrc.backup`.
+A fresh zsh session successfully ran `gcloud --version` (including `bq 2.1.41`).
+Usage reporting is disabled. No billing settings or cloud resources were changed.
+
+Sign-in succeeded on October 26: the user's Terminal confirmed CLI login and ADC
+were updated. For a future setup, open a **new Terminal window on your Mac** and run:
+
+```bash
+gcloud --version
+gcloud auth login --update-adc --project=saas-finance-learning-512616
+```
+
+Complete the Google browser sign-in yourself with the account used for BigQuery.
+`--update-adc` saves Application Default Credentials so Python's Google client
+libraries can authenticate too. Credentials are stored outside this repository;
+do not copy credential files or authorization codes into Git or chat.
+The project flag selects context for this command; later cloud operations must
+also explicitly target `saas-finance-learning-512616`.
+
+Read-only checks from this Mac also succeeded on October 26: billing is disabled,
+no billing account is linked, `raw_netsuite` is in `us-south1` with both defaults
+at 59 days, and `raw_netsuite.gl_lines` contains 16,648 rows. These checks used
+the CLI. Python ADC authentication and the read-only destination checks also
+passed on October 26. The first actual refresh with the Python client is pending.
+
+An already-open Terminal may not have the updated command path. Load it with:
+
+```bash
+source /Users/jackperry/google-cloud-sdk/path.zsh.inc
+gcloud --version
+```
+
+`bq` also needs `gcloud` on PATH for authentication; using only the full path to
+`bq` is insufficient. Local subprocesses must inherit the SDK's bin directory
+on PATH. No queries or loads were run during these metadata checks.
+
+Sources: [Google CLI installation](https://docs.cloud.google.com/sdk/docs/install-sdk),
+[login and the update-adc flag](https://docs.cloud.google.com/sdk/gcloud/reference/auth/login).
+
+## Step 3: refresh the GL with Python
+
+`src/ingestion/load_gl.py` now uses Google's Python BigQuery client. Pandas validates
+the GL; the client uploads the original validated CSV bytes with explicit types.
+No Arrow/Parquet dependency or Cloud Storage bucket is needed for this CSV lesson.
+
+From this project's folder in your Mac Terminal:
+
+```bash
+# Local validation and preview only:
+.venv-ingestion/bin/python -m src.ingestion.load_gl
+
+# Local validation plus live read-only billing/table checks:
+.venv-ingestion/bin/python -m src.ingestion.load_gl --check
+
+# Replace this project's existing GL table, then verify:
+.venv-ingestion/bin/python -m src.ingestion.load_gl --upload
+```
+
+The destination is deliberately fixed to
+`saas-finance-learning-512616.raw_netsuite.gl_lines` in `us-south1` for this lesson.
+It must already exist with the expected schema and Sandbox expiration. The loader
+checks billing with the same ADC identity as BigQuery and stops if billing is
+enabled, linked, or unknown. It never enables services or changes billing.
+
+The sequence is:
+
+1. Compare the GL file hash with the synthetic generator's manifest, run Pandas
+   validation and the full source reconciliation, and retain the exact bytes in memory.
+2. Check billing and destination metadata before any load. Input is capped at 25 MiB.
+3. Submit one batch job using `WRITE_TRUNCATE` and `CREATE_NEVER`. Successful loads
+   replace rows rather than append them; no SQL DML is used. A new run gets a new
+   job ID, but the same source should leave the same rows and totals.
+4. Verify schema, row count, unchanged expiration, and exact debit/credit totals.
+   The verification SELECT has a 10 MiB maximum-bytes-billed limit and bypasses
+   query caching. It should return 16,648 rows and 7,774,104,010 cents on each side.
+
+Only the GL is refreshed. A complete all-source refresh, cross-source cloud
+reconciliation, ingestion timestamps, mock API, and scheduling are still unbuilt.
+Run one loader at a time. Don't modify sources or the destination during a load.
+This is a full-table learning refresh for a small synthetic table, not an
+incremental production design. Hashes protect against accidental file edits;
+they are not proof of provenance against a deliberately altered manifest.
+
+If a request times out, a submitted job may still finish. The script prints its
+job ID before submission and does not automatically submit a replacement job.
+Inspect that job in BigQuery Job history before retrying. A verification failure
+after a successful load does not roll the table back. Repeated uploads still
+consume Sandbox quota, so do not loop or schedule this exercise yet.
+
+Status: preview logic and ten new loader tests pass, including a simulated double
+refresh, blocked billing states, invalid destination settings, and failed jobs.
+The live `--check` succeeded; `--upload` and a repeated cloud refresh are not yet
+verified. The earlier Cloud Shell uploads remain the currently verified data load.
+
+Source: [Google's Python BigQuery client](https://docs.cloud.google.com/python/docs/reference/bigquery/latest/google.cloud.bigquery.client.Client).
 
 ## Recreate and test the environment
 
@@ -78,8 +179,9 @@ python3.13 -m venv .venv-ingestion
 .venv-ingestion/bin/python -m unittest discover -s tests
 ```
 
-All 42 tests passed locally, including six Pandas tests covering duplicate IDs,
-invalid dates/amounts, missing fields, and offsetting unbalanced journals.
+All 52 tests passed locally, including six Pandas tests and ten Python loader tests.
+The BigQuery client requires python-dateutil below 3, so the environment and
+requirements now use the compatible 2.9.0.post0 version; `pip check` passes.
 These offline tests do not establish a cloud refresh result.
 
 Reference: [Pandas getting started](https://pandas.pydata.org/docs/getting_started/).

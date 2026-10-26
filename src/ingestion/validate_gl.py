@@ -76,8 +76,8 @@ def main():
     print(f"Total debits:  ${frame['debit_cents'].sum() / 100:,.2f}")
     print(f"Total credits: ${frame['credit_cents'].sum() / 100:,.2f}")
     print(f"Difference:    ${(frame['debit_cents'].sum() - frame['credit_cents'].sum()) / 100:,.2f}")
-    print("\nFirst five months (USD; integer cents converted only for display):")
-    display = monthly.head(5).div(100).rename(columns=lambda name: name.replace("_cents", "_usd"))
+    print("\nFirst twelve months (USD; integer cents converted only for display):")
+    display = monthly.head(12).div(100).rename(columns=lambda name: name.replace("_cents", "_usd"))
     print(display.to_string(float_format=lambda value: f"{value:,.2f}"))
 
 

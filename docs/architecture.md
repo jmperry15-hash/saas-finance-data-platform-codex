@@ -10,7 +10,9 @@ This is the target design, not a list of already deployed components. Synthetic
 source generation, the SQLite lab, and the first local Pandas exercise are implemented.
 User-provided Cloud Shell output confirms all 14 raw BigQuery tables loaded in
 `us-south1`; the user confirmed the GL row count and debit/credit totals with SQL.
-dbt, the reusable Python cloud loader, mock API, automation, and dashboard remain planned. Sources
+A single-table Python GL loader is implemented, with local tests and a live ADC
+read-only check passed; its first cloud refresh is pending. The all-source Python
+pipeline, dbt, mock API, automation, and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
 
 ## Storage and transformation layers
