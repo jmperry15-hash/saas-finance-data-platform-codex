@@ -9,7 +9,7 @@ reuses the existing raw dataset location instead of requiring US; see the
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
 relational data, BigQuery, dbt, automation, and Streamlit.
 
-**Status: first dbt view built and all five data tests passed (October 26).**
+**Status: monthly dbt P&L built and reconciled across all 24 months (October 26).**
 The user's Cloud Shell output confirms all 14 tables loaded in `us-south1`, with
 matching schemas and row counts. The user also confirmed 16,648 GL lines and
 $77,741,040.10 per side, with zero difference, through BigQuery SQL.
@@ -19,8 +19,10 @@ The user's two Python refresh outputs confirm unchanged row counts and GL totals
 The [local mock API and extractor](docs/api_exercise.md) are implemented and tested;
 the user's successful six-page extraction is verified. Manual failure practice was
 skipped at the user's request. The [first dbt department view](docs/milestone_05.md)
-is built and tested. API-to-warehouse loading, all-source refresh, financial dbt
-models, Actions, and dashboard remain planned.
+is built and tested. The accounting staging views and first monthly P&L also pass
+18 data tests; all 24 months match an independent local CSV aggregation exactly.
+API-to-warehouse loading, all-source refresh, remaining financial dbt models,
+Actions, and dashboard remain planned.
 All company and person records are fictional. There are no live source-system integrations.
 
 ## Proposed architecture
@@ -66,12 +68,12 @@ Finish and understand each gate before starting the next milestone.
 | **2. Relational SQL — lab ready** | CSVs loaded into local SQLite; eight SQL lessons | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Technical checks pass; complete the guided practice before moving on |
 | **3. BigQuery Sandbox — uploads and GL verified** | All 14 raw tables loaded; user confirmed GL SQL totals | Datasets, schemas, warehouse vs operational DB, dry runs | Row counts and GL pass; query-cost review and detailed finance checks remain |
 | **4. Python ingestion and API practice — core exercises verified** | Pandas and GL refresh/rerun; six-page customer extraction | Types, API responses, retries, idempotency, logging | Success path verified; manual failure practice skipped; API-to-warehouse integration deferred |
-| **5. dbt Core — started** | First department staging view and five passing tests | `ref`, `source`, SQL dependencies, tests, documentation | First model passes; financial models and their reconciliations remain |
+| **5. dbt Core — in progress** | Departments, accounts, GL staging and monthly P&L | `ref`, `source`, SQL dependencies, tests, documentation | Department tests and 18 accounting/P&L tests pass; 24 months reconcile; budgets, SaaS metrics and workforce remain |
 | 6. GitHub Actions | CI first; manual refresh next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The current exercise is [milestone 5, first model](docs/milestone_05.md): query and
-understand the tested department staging view. Earlier cloud uploads and Python refreshes
+The current exercise is [milestone 5, lesson 2](docs/milestone_05.md#lesson-2-your-first-monthly-pl): query and
+understand the tested monthly P&L. Earlier cloud uploads and Python refreshes
 are evidenced by user screenshots/SQL confirmations and live read-only checks.
 
 ## Folder structure

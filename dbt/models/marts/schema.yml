@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: rpt_pnl_monthly
+    description: >
+      Monthly synthetic operating P&L. Revenue is credit minus debit, expenses are
+      debit minus credit, and operating profit is revenue minus expenses.
+      Balance sheet entries contribute zero. Not a complete GAAP income statement.
+    columns:
+      - name: month
+        data_tests: [not_null, unique]
+      - name: revenue_cents
+        description: Recognized revenue in integer USD cents, not bookings or cash collections.
+        data_tests: [not_null]
+      - name: expense_cents
+        description: Total expenses in integer USD cents; costs of revenue are included.
+        data_tests: [not_null]
+      - name: operating_profit_cents
+        description: Revenue minus total expenses; loss is negative.
+        data_tests: [not_null]

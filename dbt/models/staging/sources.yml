@@ -8,3 +8,13 @@ sources:
     tables:
       - name: departments
         description: One row per synthetic department; the raw source is kept unchanged.
+
+  - name: netsuite
+    description: Synthetic accounting data already loaded into BigQuery.
+    database: saas-finance-learning-512616
+    schema: raw_netsuite
+    tables:
+      - name: accounts
+        description: One row per chart-of-accounts ID.
+      - name: gl_lines
+        description: One row per journal line; amounts are integer USD cents.

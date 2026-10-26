@@ -1,5 +1,6 @@
-"""Build only the first department view after checking the unbilled project."""
+"""Build a selected dbt lesson after checking the unbilled project."""
 
+import argparse
 import os
 from pathlib import Path
 import subprocess
@@ -17,6 +18,9 @@ EXPIRATION_MS = 59 * 86400000
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--lesson", choices=("departments", "pnl"), default="departments")
+    args = parser.parse_args()
     profile_dir = ROOT / "config/dbt"
     profile = profile_dir / "profiles.yml"
     if not profile.exists():
@@ -25,7 +29,7 @@ def main():
     expected = {
         "type": "bigquery", "method": "oauth", "project": PROJECT,
         "dataset": "staging", "location": LOCATION, "threads": 1,
-        "maximum_bytes_billed": 10485760, "job_execution_timeout_seconds": 120,
+        "maximum_bytes_billed": 52428800, "job_execution_timeout_seconds": 120,
         "job_retries": 0, "priority": "interactive",
     }
     if settings != {"target": "dev", "outputs": {"dev": expected}}:
@@ -45,28 +49,38 @@ def main():
         source = client.get_table(f"{PROJECT}.raw_shared.departments", timeout=30)
         if source.location != LOCATION or source.num_rows != 6:
             raise ValueError("Expected the six source departments in us-south1.")
-        try:
-            dataset = client.get_dataset(f"{PROJECT}.staging", timeout=30)
-        except NotFound:
-            dataset = bigquery.Dataset(f"{PROJECT}.staging")
-            dataset.location = LOCATION
-            dataset.default_table_expiration_ms = EXPIRATION_MS
-            dataset.default_partition_expiration_ms = EXPIRATION_MS
-            dataset = client.create_dataset(dataset, timeout=30)
-            print("Created staging dataset with 59-day expiration defaults.", flush=True)
-        if dataset.location != LOCATION or any(
-            value is None or not 0 < value < 60 * 86400000
-            for value in (dataset.default_table_expiration_ms, dataset.default_partition_expiration_ms)
-        ):
-            raise ValueError("Review staging location/expiration before proceeding.")
+        datasets = ["staging"]
+        if args.lesson == "pnl":
+            for table_name in ("accounts", "gl_lines"):
+                table = client.get_table(f"{PROJECT}.raw_netsuite.{table_name}", timeout=30)
+                if table.location != LOCATION or not table.num_rows:
+                    raise ValueError(f"Expected nonempty raw_netsuite.{table_name} in {LOCATION}.")
+            datasets.append("finance")
+        for name in datasets:
+            try:
+                dataset = client.get_dataset(f"{PROJECT}.{name}", timeout=30)
+            except NotFound:
+                dataset = bigquery.Dataset(f"{PROJECT}.{name}")
+                dataset.location = LOCATION
+                dataset.default_table_expiration_ms = EXPIRATION_MS
+                dataset.default_partition_expiration_ms = EXPIRATION_MS
+                dataset = client.create_dataset(dataset, timeout=30)
+                print(f"Created {name} dataset with 59-day expiration defaults.", flush=True)
+            if dataset.location != LOCATION or any(
+                value is None or not 0 < value < 60 * 86400000
+                for value in (dataset.default_table_expiration_ms, dataset.default_partition_expiration_ms)
+            ):
+                raise ValueError(f"Review {name} location/expiration before proceeding.")
 
-    print("Billing disabled; source and staging checked. Building one view and its tests.", flush=True)
+    selection = "stg_departments" if args.lesson == "departments" else "+rpt_pnl_monthly"
+    print(f"Billing disabled; sources and datasets checked. Building {args.lesson} lesson.", flush=True)
     subprocess.run([
         str(ROOT / ".venv-dbt/bin/dbt"), "build",
         "--project-dir", str(ROOT / "dbt"),
         "--profiles-dir", str(profile_dir), "--target", "dev",
-        "--select", "stg_departments",
-    ], cwd=ROOT, env={**os.environ, "DBT_SEND_ANONYMOUS_USAGE_STATS": "false"}, check=True)
+        "--select", selection,
+    ], cwd=ROOT, env={**os.environ, "DBT_SEND_ANONYMOUS_USAGE_STATS": "false",
+                     "GOOGLE_CLOUD_PROJECT": PROJECT}, check=True)
 
 
 if __name__ == "__main__":

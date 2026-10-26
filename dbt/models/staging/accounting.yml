@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_accounts
+    description: One row per account; required unique keys prevent GL join multiplication.
+    columns:
+      - name: account_id
+        data_tests: [not_null, unique]
+      - name: account_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Asset', 'Liability', 'Equity', 'Revenue', 'Expense']
+
+  - name: stg_gl_lines
+    description: All journal lines, including balance sheet entries, in integer USD cents.
+    columns:
+      - name: line_id
+        data_tests: [not_null, unique]
+      - name: month
+        data_tests: [not_null]
+      - name: account_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: debit_cents
+        data_tests: [not_null]
+      - name: credit_cents
+        data_tests: [not_null]
