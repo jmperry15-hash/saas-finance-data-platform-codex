@@ -1,0 +1,18 @@
+name: saas_finance
+version: '1.0.0'
+config-version: 2
+profile: saas_finance_learning
+
+model-paths: [models]
+test-paths: [tests]
+
+flags:
+  send_anonymous_usage_stats: false
+
+models:
+  saas_finance:
+    +materialized: view
+
+data_tests:
+  saas_finance:
+    +store_failures: false

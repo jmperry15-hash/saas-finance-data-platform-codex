@@ -1,0 +1,15 @@
+# No secrets: OAuth uses the Application Default Credentials on your Mac.
+saas_finance_learning:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: saas-finance-learning-512616
+      dataset: staging
+      location: us-south1
+      threads: 1
+      maximum_bytes_billed: 10485760
+      job_execution_timeout_seconds: 120
+      job_retries: 0
+      priority: interactive

@@ -1,0 +1,76 @@
+"""Build only the first department view after checking the unbilled project."""
+
+import os
+from pathlib import Path
+import subprocess
+
+import google.auth
+from google.auth.transport.requests import AuthorizedSession
+from google.api_core.exceptions import NotFound
+from google.cloud import bigquery
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+PROJECT = "saas-finance-learning-512616"
+LOCATION = "us-south1"
+EXPIRATION_MS = 59 * 86400000
+
+
+def main():
+    profile_dir = ROOT / "config/dbt"
+    profile = profile_dir / "profiles.yml"
+    if not profile.exists():
+        profile.write_bytes((profile_dir / "profiles.example.yml").read_bytes())
+    settings = yaml.safe_load(profile.read_text())["saas_finance_learning"]
+    expected = {
+        "type": "bigquery", "method": "oauth", "project": PROJECT,
+        "dataset": "staging", "location": LOCATION, "threads": 1,
+        "maximum_bytes_billed": 10485760, "job_execution_timeout_seconds": 120,
+        "job_retries": 0, "priority": "interactive",
+    }
+    if settings != {"target": "dev", "outputs": {"dev": expected}}:
+        raise ValueError("Profile differs from this lesson's fixed destination and query limits.")
+
+    credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+    with AuthorizedSession(credentials) as session:
+        response = session.get(
+            f"https://cloudbilling.googleapis.com/v1/projects/{PROJECT}/billingInfo", timeout=30
+        )
+        response.raise_for_status()
+        billing = response.json()
+    if billing.get("billingEnabled") is not False or billing.get("billingAccountName"):
+        raise ValueError("Billing must be disabled with no linked account for this lesson.")
+
+    with bigquery.Client(project=PROJECT, credentials=credentials, location=LOCATION) as client:
+        source = client.get_table(f"{PROJECT}.raw_shared.departments", timeout=30)
+        if source.location != LOCATION or source.num_rows != 6:
+            raise ValueError("Expected the six source departments in us-south1.")
+        try:
+            dataset = client.get_dataset(f"{PROJECT}.staging", timeout=30)
+        except NotFound:
+            dataset = bigquery.Dataset(f"{PROJECT}.staging")
+            dataset.location = LOCATION
+            dataset.default_table_expiration_ms = EXPIRATION_MS
+            dataset.default_partition_expiration_ms = EXPIRATION_MS
+            dataset = client.create_dataset(dataset, timeout=30)
+            print("Created staging dataset with 59-day expiration defaults.", flush=True)
+        if dataset.location != LOCATION or any(
+            value is None or not 0 < value < 60 * 86400000
+            for value in (dataset.default_table_expiration_ms, dataset.default_partition_expiration_ms)
+        ):
+            raise ValueError("Review staging location/expiration before proceeding.")
+
+    print("Billing disabled; source and staging checked. Building one view and its tests.", flush=True)
+    subprocess.run([
+        str(ROOT / ".venv-dbt/bin/dbt"), "build",
+        "--project-dir", str(ROOT / "dbt"),
+        "--profiles-dir", str(profile_dir), "--target", "dev",
+        "--select", "stg_departments",
+    ], cwd=ROOT, env={**os.environ, "DBT_SEND_ANONYMOUS_USAGE_STATS": "false"}, check=True)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as error:
+        raise SystemExit(f"Stopped: {error}") from error

@@ -12,8 +12,11 @@ User-provided Cloud Shell output confirms all 14 raw BigQuery tables loaded in
 `us-south1`; the user confirmed the GL row count and debit/credit totals with SQL.
 A single-table Python GL loader is implemented: the user's two successful refresh
 outputs verify row counts and financial totals without duplicates. A separate
-local customer mock API and paginated extractor are implemented and tested; user
-practice is next. The all-source Python pipeline, dbt, automation, and dashboard remain planned. Sources
+local customer mock API and paginated extractor are implemented and tested; the
+user confirmed successful extraction and skipped manual failure practice. The first
+dbt department staging view and five data tests passed live on October 26.
+API-to-warehouse integration, all-source refresh, financial dbt models, automation,
+and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
 
 ## Storage and transformation layers

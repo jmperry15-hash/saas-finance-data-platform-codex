@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: stg_departments
+    description: >
+      One row per department. Trims surrounding whitespace and renames function
+      to department_function for downstream financial models. Materialized as a view.
+    columns:
+      - name: department_id
+        description: Stable department key used to join GL, workforce and plans.
+        data_tests: [not_null, unique]
+      - name: department_name
+        description: Readable department label.
+        data_tests: [not_null]
+      - name: department_function
+        description: Financial function such as Research and development.
+        data_tests: [not_null]

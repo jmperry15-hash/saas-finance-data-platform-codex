@@ -175,7 +175,10 @@ Source: [Google's Python BigQuery client](https://docs.cloud.google.com/python/d
 Follow [the two-window API exercise](api_exercise.md). The local mock server
 returns synthetic customer records as paginated JSON; the extractor collects all
 130 records across six pages and publishes a complete CSV only after validation.
-The CLI smoke test and eight API tests pass. User practice is the next gate.
+The CLI smoke test and eight API tests pass. The user also extracted all 130 records
+successfully on October 26. Manual failure/recovery practice was skipped at the
+user's request; API-to-BigQuery loading remains deferred. Next is
+[milestone 5: the first dbt model](milestone_05.md).
 
 ## Recreate and test the environment
 

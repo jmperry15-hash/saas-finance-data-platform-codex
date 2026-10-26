@@ -93,7 +93,10 @@ stopped afterward. Eight new tests cover real loopback HTTP, repeat extraction,
 failed-page preservation, invalid parameters, bounded retries, malformed responses,
 mixed snapshots, duplicate IDs and invalid records. All 60 project tests pass.
 
-User walkthrough and manual failure exercise are pending. This is an extraction
-exercise only: the API extract is not connected to the BigQuery loader yet.
-Real vendor authentication, all-source refresh orchestration, dbt, scheduling,
-and dashboard work remain later steps.
+The user's October 26 output confirms successful extraction of all 130 records
+across six pages. The manual failure/recovery exercise is **skipped at the user's
+request**, not marked passed; the attempted failing server could not start because
+the normal server still occupied the port. Automated failure tests passed earlier.
+The API extract is not connected to the BigQuery loader yet. Real vendor
+authentication, all-source refresh orchestration, scheduling and dashboard work
+remain later steps. Continue with [the first dbt model](milestone_05.md).

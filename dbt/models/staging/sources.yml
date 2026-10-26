@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: shared
+    description: Synthetic common master data already uploaded to BigQuery.
+    database: saas-finance-learning-512616
+    schema: raw_shared
+    tables:
+      - name: departments
+        description: One row per synthetic department; the raw source is kept unchanged.
