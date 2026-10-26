@@ -10,9 +10,10 @@ This is the target design, not a list of already deployed components. Synthetic
 source generation, the SQLite lab, and the first local Pandas exercise are implemented.
 User-provided Cloud Shell output confirms all 14 raw BigQuery tables loaded in
 `us-south1`; the user confirmed the GL row count and debit/credit totals with SQL.
-A single-table Python GL loader is implemented, with local tests and a live ADC
-read-only check passed; its first cloud refresh is pending. The all-source Python
-pipeline, dbt, mock API, automation, and dashboard remain planned. Sources
+A single-table Python GL loader is implemented: the user's two successful refresh
+outputs verify row counts and financial totals without duplicates. A separate
+local customer mock API and paginated extractor are implemented and tested; user
+practice is next. The all-source Python pipeline, dbt, automation, and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
 
 ## Storage and transformation layers
@@ -140,5 +141,7 @@ not a secret scanner; review staged files before each push.
 ## Scope of the first milestone
 
 The CSVs resemble business entities from the named tools; they are not exact
-NetSuite, Salesforce, Workday, or Pigment API payloads. Local API practice will
-wrap these synthetic records. No vendor sandbox subscriptions are required.
+NetSuite, Salesforce, Workday, or Pigment API payloads. Local API practice now
+wraps the synthetic customer records. The implemented endpoint is a separate
+local extraction exercise, not yet connected to the warehouse refresh.
+No vendor sandbox subscriptions are required.

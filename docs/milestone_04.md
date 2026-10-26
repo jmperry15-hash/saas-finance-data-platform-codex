@@ -64,8 +64,8 @@ to five months; all 24 months are still validated. Change it to `monthly.head(12
 and rerun to display twelve months. The grand totals should remain unchanged.
 
 The user completed this exercise on October 26, 2026 and displayed twelve months.
-Local authentication and the single-table Python loader are now ready. The mock
-API and a pipeline for refreshing all sources remain later exercises.
+Local authentication and the single-table Python loader are verified. The mock
+API exercise is implemented and tested; an all-source refresh pipeline is still unbuilt.
 
 ## Step 2: local Google Cloud CLI and sign-in
 
@@ -95,7 +95,8 @@ Read-only checks from this Mac also succeeded on October 26: billing is disabled
 no billing account is linked, `raw_netsuite` is in `us-south1` with both defaults
 at 59 days, and `raw_netsuite.gl_lines` contains 16,648 rows. These checks used
 the CLI. Python ADC authentication and the read-only destination checks also
-passed on October 26. The first actual refresh with the Python client is pending.
+passed on October 26. The user subsequently ran two successful Python refreshes
+with identical row counts and GL totals, confirming replacement behavior in BigQuery.
 
 An already-open Terminal may not have the updated command path. Load it with:
 
@@ -149,7 +150,8 @@ The sequence is:
    query caching. It should return 16,648 rows and 7,774,104,010 cents on each side.
 
 Only the GL is refreshed. A complete all-source refresh, cross-source cloud
-reconciliation, ingestion timestamps, mock API, and scheduling are still unbuilt.
+reconciliation, ingestion timestamps, and scheduling are still unbuilt. The
+mock API extraction exercise below runs separately from cloud loading.
 Run one loader at a time. Don't modify sources or the destination during a load.
 This is a full-table learning refresh for a small synthetic table, not an
 incremental production design. Hashes protect against accidental file edits;
@@ -161,12 +163,19 @@ Inspect that job in BigQuery Job history before retrying. A verification failure
 after a successful load does not roll the table back. Repeated uploads still
 consume Sandbox quota, so do not loop or schedule this exercise yet.
 
-Status: preview logic and ten new loader tests pass, including a simulated double
-refresh, blocked billing states, invalid destination settings, and failed jobs.
-The live `--check` succeeded; `--upload` and a repeated cloud refresh are not yet
-verified. The earlier Cloud Shell uploads remain the currently verified data load.
+Status: the user provided two successful `--upload` run outputs on October 26.
+Both show 16,648 rows, $77,741,040.10 of debits and credits, and successful schema
+and expiration verification. The second run did not duplicate rows. Offline
+tests also cover blocked billing states, invalid destination settings and failed jobs.
 
 Source: [Google's Python BigQuery client](https://docs.cloud.google.com/python/docs/reference/bigquery/latest/google.cloud.bigquery.client.Client).
+
+## Step 4: local API extraction
+
+Follow [the two-window API exercise](api_exercise.md). The local mock server
+returns synthetic customer records as paginated JSON; the extractor collects all
+130 records across six pages and publishes a complete CSV only after validation.
+The CLI smoke test and eight API tests pass. User practice is the next gate.
 
 ## Recreate and test the environment
 
@@ -179,7 +188,7 @@ python3.13 -m venv .venv-ingestion
 .venv-ingestion/bin/python -m unittest discover -s tests
 ```
 
-All 52 tests passed locally, including six Pandas tests and ten Python loader tests.
+All 60 tests passed locally, including six Pandas, ten Python loader and eight API tests.
 The BigQuery client requires python-dateutil below 3, so the environment and
 requirements now use the compatible 2.9.0.post0 version; `pip check` passes.
 These offline tests do not establish a cloud refresh result.
