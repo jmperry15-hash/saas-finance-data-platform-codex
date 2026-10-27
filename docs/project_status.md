@@ -14,7 +14,7 @@ not yet a fully automated platform.
 | Python ingestion | Pandas GL validation and repeatable GL replacement load; two successful user runs | DataFrames, authentication, idempotency, logging, checks before and after loading |
 | Mock API | 130 customers extracted across six pages; automated failure tests | HTTP/JSON, pagination, bounded retries, atomic file output |
 | dbt | 14 SQL models covering staging, P&L, BUD2025 comparison, ARR/customers, bookings and workforce | `source`, `ref`, dependency ordering, SQL views, data and unit tests, reconciliations |
-| Version control/security | Local Git commits; ignored credentials and generated data; guarded cloud helpers | Git history, environments, ADC login, least privilege and cost controls |
+| Version control/security | Local Git history published to the user-approved public portfolio; ignored credentials and generated data; guarded cloud helpers | Git history, environments, ADC login, least privilege and cost controls |
 
 The dbt project contains 104 data tests and four unit tests. Each lesson's
 selected models/tests has passed; a single complete end-to-end build is still
@@ -29,14 +29,15 @@ verification of cloud freshness or account settings.
 
 [Milestone 6, lesson 1](milestone_06.md): a manual GitHub Actions workflow for
 synthetic generation, saved-file validation and the Python tests. The workflow
-is local; a hosted run and GitHub remote connection remain pending.
+is published in the [public GitHub repository](https://github.com/jmperry15-hash/saas-finance-data-platform-codex);
+local `main` tracks `origin/main`. The first hosted run remains pending.
 
 ## Remaining core work
 
 1. **Complete refresh pipeline:** refresh all necessary raw sources consistently,
    then rebuild/test reporting models. Check reruns, failures and recovery from
    expired sandbox tables. Only the GL has a dedicated Python refresh today.
-2. **GitHub automation:** connect/push the repository, verify CI, demonstrate
+2. **GitHub automation:** repository connected and pushed; next verify CI, demonstrate
    failure handling, and establish a free manual refresh path. A schedule is
    optional and comes after a successful manual run.
 3. **Streamlit dashboard:** P&L/BvA, revenue/ARR/bookings/customer trends,

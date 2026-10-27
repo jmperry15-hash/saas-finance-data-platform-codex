@@ -72,7 +72,8 @@ metric definitions, refresh design, security, and free-tier limits.
 
 Download the [three-page data lineage PDF](output/pdf/saas_finance_lineage.pdf)
 or [high-resolution lineage image](output/pdf/saas_finance_lineage.png).
-These show the implemented Python paths, all 14 raw tables, all 14 dbt models,
+These preserve the pre-publication lineage snapshot: implemented Python paths,
+all 14 raw tables, all 14 dbt models,
 SQL reporting queries, and planned components as of October 26. The diagram
 builder in `scripts/build_lineage_diagram.py` checks its 22 direct model edges
 against the actual SQL; it requires ReportLab only for document generation.
@@ -92,7 +93,7 @@ Finish and understand each gate before starting the next milestone.
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
 The current exercise is [milestone 6, lesson 1](docs/milestone_06.md): connect
-the repository to GitHub and learn how a workflow runs existing checks.
+the now-published repository and learn how a workflow runs existing checks.
 Read the [project status](docs/project_status.md) for completed work, evidence
 and remaining scope. Earlier cloud uploads and Python refreshes are evidenced
 by user screenshots/SQL confirmations and prior live read-only checks.
@@ -188,25 +189,24 @@ of the bulk-upload helper, six Pandas, ten Python loader, and eight API checks. 
 `.venv-ingestion/bin/python -m unittest discover -s tests`; the original `.venv`
 has no Pandas. Offline checks do not establish successful cloud uploads.
 
-## GitHub handoff
+## GitHub repository and first workflow run
 
-Local Git tracks the source generator and SQL lab. A remote GitHub repository
-is **not created or connected**. The connected GitHub tools do not offer repository
-creation, and the GitHub CLI is not installed here.
+The project is published as a **public portfolio**, as explicitly chosen by Jack:
+[saas-finance-data-platform-codex](https://github.com/jmperry15-hash/saas-finance-data-platform-codex).
+Local `main` tracks `origin/main`. Source code, documentation and lineage diagrams
+are included; generated data, Python environments and local credentials are ignored.
+The full history was checked for common credential patterns before the first push;
+that check is not a guarantee against every possible secret format.
 
-When ready, create an empty **private** repository named
-`saas-finance-data-platform` in GitHub. Do not initialize it with another README
-or `.gitignore`. Then use the repository URL GitHub gives you:
+The validation workflow is uploaded but its first hosted run is still pending.
+Open [Actions](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/workflows/validate.yml), choose **Run workflow**, select
+**main**, then click the green **Run workflow** button. Use your signed-in browser.
+It generates synthetic data, validates it and runs the Python suite; it does not
+refresh BigQuery. Pushing alone does not start this manually triggered workflow.
 
-```bash
-git remote add origin YOUR_REPOSITORY_URL
-git push -u origin main
-```
-
-Use GitHub's supported browser/credential-manager sign-in flow if prompted; do
-not paste a token into chat, a remote URL, or a source file. Public portfolio
-sharing is a later choice. The validation workflow has only a manual trigger;
-pushing does not start a run. Check included Actions usage and block paid overages
-before its first hosted run. It does not refresh BigQuery.
+The workflow uses a standard Ubuntu runner, with no artifact uploads or cache.
+Standard hosted runners are free for public repositories under
+[GitHub's current billing rules](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+Recheck allowances and block paid overages if the repository becomes private.
 
 Continue with [milestone 6: automation](docs/milestone_06.md).

@@ -7,9 +7,11 @@ local data files or Google login. Continuous integration (CI) checks the code
 and data rules whenever a workflow runs. We start with a manual button so you
 can understand one run before enabling automatic triggers.
 
-**Current status:** the workflow is prepared locally. GitHub execution remains
-pending; this checkout has no GitHub remote configured. This lesson does not
-refresh BigQuery or execute dbt against the warehouse.
+**Current status:** code and the workflow are published to the public
+[portfolio repository](https://github.com/jmperry15-hash/saas-finance-data-platform-codex), as Jack explicitly chose.
+Local `main` tracks `origin/main`. GitHub execution remains pending: the agent's
+browser is signed out, so start the first run from your signed-in browser.
+This lesson does not refresh BigQuery or execute dbt against the warehouse.
 
 **Local verification, October 26:** in a temporary copy containing only tracked
 project files, generation and saved-file validation passed all 764 controls,
@@ -43,24 +45,16 @@ It does not establish that warehouse data is current or that dbt models pass.
 
 ## Your next action
 
-1. In GitHub, create an **empty private** repository named
-   `saas-finance-data-platform`. Leave README, license and `.gitignore`
-   initialization unchecked because those files already exist locally.
-2. Copy the repository URL and share that URL in this chat. If you already
-   created a repository, share its URL instead. No password or token is needed
-   in chat.
+The repository has been created, connected and pushed. Start the first run in
+your signed-in GitHub browser using the steps below.
 
-We will then connect the local repository, review the tracked files, and push
-the code. Pushing alone will not start this manually triggered workflow.
+This repository is public and the workflow uses a standard Ubuntu runner, so
+runner usage is free under [GitHub's billing rules](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+There are no cache or artifact uploads and no schedule. If you later make the
+repository private, check its shared included allowance and block paid overages
+before running Actions. BigQuery billing remains separate and should stay disabled.
 
-Before the first hosted run, check your GitHub account's Actions usage and
-spending controls. Private repositories draw from a shared included allowance;
-overages can be billable. Keep paid overages blocked and use only the included
-allowance. If it is unavailable, continue running the checks locally. This
-workflow uses a standard runner, no cache or artifact uploads, and no schedule.
-See [GitHub's Actions billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
-
-Once those checks are complete, open **Actions → Validate synthetic finance
+Open **Actions → Validate synthetic finance
 data → Run workflow → main → Run workflow**. Open the run to inspect each
 step's log. The workflow must be on the default branch for the manual button
 to appear. See [GitHub's manual-run instructions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
