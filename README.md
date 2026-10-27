@@ -92,8 +92,8 @@ Finish and understand each gate before starting the next milestone.
 | **6. GitHub Actions — first workflow prepared** | CI first; complete refresh pipeline next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The current exercise is [milestone 6, lesson 1](docs/milestone_06.md): connect
-the now-published repository and learn how a workflow runs existing checks.
+The current exercise is [milestone 6, lesson 1](docs/milestone_06.md): run the
+published workflow and learn how GitHub executes the existing checks.
 Read the [project status](docs/project_status.md) for completed work, evidence
 and remaining scope. Earlier cloud uploads and Python refreshes are evidenced
 by user screenshots/SQL confirmations and prior live read-only checks.
