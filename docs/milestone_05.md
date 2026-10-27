@@ -30,8 +30,9 @@ three expected columns and a 59-day expiration. Billing was confirmed disabled
 with no linked account before creating the staging dataset or running dbt.
 
 This completed the first component. Lesson 2 adds accounting staging and a monthly
-operating P&L; lesson 3 adds the BUD2025 comparison. Detailed P&L classifications,
-ARR/bookings and workforce reporting remain later components of this milestone.
+operating P&L; lesson 3 adds the BUD2025 comparison; lesson 4 adds ARR and active
+customer snapshots. Detailed P&L classifications, bookings, retention/movement
+analysis and workforce reporting remain later components of this milestone.
 
 ## Lesson 1 practice: query the view
 
@@ -271,3 +272,84 @@ query also returned the expected 24 rows. All four new views were verified in
 `data/local/budget_reconciliation.json` file.
 
 Reference: [dbt unit tests](https://docs.getdbt.com/docs/build/unit-tests).
+
+## Lesson 4: ARR and active customers
+
+The user completed the budget comparison lesson. We now use the synthetic
+Salesforce snapshots to report MRR, ARR and active customers for each month.
+
+### What we built
+
+```text
+raw_salesforce.customer_monthly
+    → staging.stg_customer_monthly
+    → finance.rpt_arr_monthly
+```
+
+The first view keeps one row per customer per month, including zero balances.
+The second summarizes those rows into one company-wide monthly snapshot.
+Both definitions are local SQL files run by dbt; both views live in BigQuery.
+
+Read `dbt/models/marts/rpt_arr_monthly.sql` in this order:
+
+1. `GROUP BY month` adds customer MRR and ARR **within each month**.
+2. `COUNTIF(mrr_cents > 0)` counts active customers. A record in the customer
+   master is not necessarily a paying customer; the master also includes prospects.
+3. `LAG(arr_cents) OVER (ORDER BY month)` looks at the previous month's ARR.
+   This is a **window function**: it compares rows without collapsing the report
+   into a single total. It runs after the customer data is aggregated to one row per month.
+4. Subtract previous ARR to get the change; divide by previous ARR for growth.
+   The first row has no observed previous month, so change/growth are NULL.
+   A zero prior ARR also produces NULL growth instead of a divide-by-zero error.
+
+The `month` date labels the period using its first day. These are monthly snapshot
+balances, not transaction amounts. For this generator, contract changes occur on
+month boundaries, so balances are constant within each month.
+
+**ARR and active customer counts are not additive across months.** To report
+year-end ARR, select December's balance. Do not sum twelve monthly ARR values.
+Monthly revenue in the P&L, by contrast, can be summed to annual revenue.
+
+### Your next action
+
+Copy `sql/bigquery/04_arr_trend.sql` into the BigQuery SQL editor and run it.
+Expect 24 rows, October 2024 through September 2026, with these endpoints:
+
+| Month | Active customers | MRR | ARR | ARR growth |
+| --- | ---: | ---: | ---: | ---: |
+| October 2024 | 55 | $330,477.00 | $3,965,724.00 | NULL |
+| September 2026 | 100 | $631,037.80 | $7,572,453.60 | -1.92% |
+
+Find `LAG` in the model and explain why the first month's change is blank. Then
+check that one month's ARR equals MRR × 12. This distinguishes the annualized
+recurring balance from that month's recognized revenue.
+
+### Rebuild and test
+
+```bash
+cd /Users/jackperry/Documents/Codex/saas-finance-data-platform
+.venv-dbt/bin/python scripts/dbt_lesson.py --lesson arr
+```
+
+The live build passed **16 steps: two views, 13 data tests and one unit test**.
+Controls check unique customer/month keys, required values, nonnegative MRR/ARR,
+ARR = MRR × 12, master-customer references and a complete monthly grid. Grid
+completeness matters because otherwise LAG could compare January with March
+as if they were consecutive months. The source master is explicitly included
+in this lesson's test selection, without creating another model for it.
+
+The unit test covers inactive customers, the first-month NULLs, a fall to zero
+ARR and recovery from zero. A separate Python calculation from local **contract
+start/end dates and amounts** checks all 24 reported months independently of the
+snapshot aggregation. Money remains integer cents until display.
+That independent comparison passed for all 24 months, including customer counts
+and growth. MRR also matched the monthly GL revenue in every period. This equality
+is specific to our synthetic, purely recurring subscription scenario; it should
+not be assumed for a company with services, usage charges or different revenue rules.
+Both views were verified in `us-south1` with 59-day expiration. Local evidence is
+in the ignored `data/local/arr_reconciliation.json` file. Billing remains disabled
+and the existing 50 MiB per-query limit is unchanged.
+
+This lesson does not yet report bookings, an ARR movement bridge, GRR or NRR.
+Those need additional event and customer-cohort rules; net ARR growth alone
+does not explain new business versus expansion or churn.

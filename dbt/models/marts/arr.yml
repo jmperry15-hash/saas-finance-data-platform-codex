@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: rpt_arr_monthly
+    description: >
+      One company snapshot per month: MRR, ARR, active customers and month-over-month
+      ARR growth. ARR and customer counts are balances, not additive across months.
+      An active customer has positive MRR; the 130 master records include prospects.
+    columns:
+      - name: month
+        data_tests: [not_null, unique]
+      - name: mrr_cents
+        data_tests: [not_null]
+      - name: arr_cents
+        data_tests: [not_null]
+      - name: active_customers
+        data_tests: [not_null]
+      - name: previous_arr_cents
+        description: Prior observed month's ARR; NULL for the first month.
+      - name: arr_change_cents
+        description: Ending ARR minus previous ARR; NULL for the first month.
+      - name: arr_growth_ratio
+        description: ARR change divided by previous ARR; NULL for absent or zero prior ARR.
+
+unit_tests:
+  - name: arr_counts_only_active_and_handles_missing_or_zero_prior
+    model: rpt_arr_monthly
+    given:
+      - input: ref('stg_customer_monthly')
+        rows:
+          - {customer_id: A, month: '2025-01-01', mrr_cents: 100, arr_cents: 1200}
+          - {customer_id: B, month: '2025-01-01', mrr_cents: 50, arr_cents: 600}
+          - {customer_id: A, month: '2025-02-01', mrr_cents: 0, arr_cents: 0}
+          - {customer_id: B, month: '2025-02-01', mrr_cents: 0, arr_cents: 0}
+          - {customer_id: A, month: '2025-03-01', mrr_cents: 200, arr_cents: 2400}
+          - {customer_id: B, month: '2025-03-01', mrr_cents: 0, arr_cents: 0}
+    expect:
+      rows:
+        - {month: '2025-01-01', mrr_cents: 150, arr_cents: 1800, active_customers: 2, previous_arr_cents: null, arr_change_cents: null, arr_growth_ratio: null}
+        - {month: '2025-02-01', mrr_cents: 0, arr_cents: 0, active_customers: 0, previous_arr_cents: 1800, arr_change_cents: -1800, arr_growth_ratio: -1}
+        - {month: '2025-03-01', mrr_cents: 200, arr_cents: 2400, active_customers: 1, previous_arr_cents: 0, arr_change_cents: 2400, arr_growth_ratio: null}

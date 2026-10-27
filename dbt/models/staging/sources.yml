@@ -26,3 +26,11 @@ sources:
     tables:
       - name: versions
       - name: financial_plan
+
+  - name: salesforce
+    description: Synthetic customer master records and monthly recurring-revenue snapshots.
+    database: saas-finance-learning-512616
+    schema: raw_salesforce
+    tables:
+      - name: customers
+      - name: customer_monthly

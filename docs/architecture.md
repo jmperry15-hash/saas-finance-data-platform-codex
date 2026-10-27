@@ -21,6 +21,10 @@ The summary reports revenue, total expenses and operating profit. Lesson 3 added
 `fct_pnl_monthly` at month/department/account grain and `fct_budget_vs_actual`, fixed
 to BUD2025. Its 37 data tests and one unit test pass, including the upstream controls.
 Other version selections and detailed functional classifications remain future work.
+Lesson 4 added customer/month staging and `finance.rpt_arr_monthly` for MRR, ARR,
+active customers and month-over-month growth. Thirteen data tests and one unit test
+pass. All 24 months reconcile independently to local contracts and MRR ties to
+GL revenue for this generator; bookings, ARR movements and cohort retention remain unbuilt.
 API-to-warehouse integration, all-source refresh, remaining financial models,
 automation and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.

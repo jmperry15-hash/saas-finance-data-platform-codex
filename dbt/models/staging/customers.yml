@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: stg_customer_monthly
+    description: >
+      One snapshot per customer per month. Zero MRR retains inactive/prospect records.
+      month is the month-start label for the monthly snapshot, not a transaction date.
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('salesforce', 'customers')
+                field: customer_id
+      - name: month
+        data_tests: [not_null]
+      - name: mrr_cents
+        data_tests: [not_null]
+      - name: arr_cents
+        data_tests: [not_null]

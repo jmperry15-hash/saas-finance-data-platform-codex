@@ -19,7 +19,7 @@ EXPIRATION_MS = 59 * 86400000
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--lesson", choices=("departments", "pnl", "budget"), default="departments")
+    parser.add_argument("--lesson", choices=("departments", "pnl", "budget", "arr"), default="departments")
     args = parser.parse_args()
     profile_dir = ROOT / "config/dbt"
     profile = profile_dir / "profiles.yml"
@@ -50,8 +50,9 @@ def main():
         if source.location != LOCATION or source.num_rows != 6:
             raise ValueError("Expected the six source departments in us-south1.")
         datasets = ["staging"]
-        if args.lesson in ("pnl", "budget"):
-            sources = ["raw_netsuite.accounts", "raw_netsuite.gl_lines"]
+        if args.lesson in ("pnl", "budget", "arr"):
+            sources = (["raw_salesforce.customers", "raw_salesforce.customer_monthly"]
+                       if args.lesson == "arr" else ["raw_netsuite.accounts", "raw_netsuite.gl_lines"])
             if args.lesson == "budget":
                 sources += ["raw_pigment.versions", "raw_pigment.financial_plan"]
             for table_name in sources:
@@ -76,7 +77,8 @@ def main():
                 raise ValueError(f"Review {name} location/expiration before proceeding.")
 
     selection = {"departments": "+stg_departments", "pnl": "+rpt_pnl_monthly",
-                 "budget": "+fct_budget_vs_actual"}[args.lesson]
+                 "budget": "+fct_budget_vs_actual",
+                 "arr": "+rpt_arr_monthly source:salesforce"}[args.lesson]
     print(f"Billing disabled; sources and datasets checked. Building {args.lesson} lesson.", flush=True)
     subprocess.run([
         str(ROOT / ".venv-dbt/bin/dbt"), "build",
