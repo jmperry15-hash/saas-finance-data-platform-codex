@@ -31,8 +31,8 @@ with no linked account before creating the staging dataset or running dbt.
 
 This completed the first component. Lesson 2 adds accounting staging and a monthly
 operating P&L; lesson 3 adds the BUD2025 comparison; lesson 4 adds ARR and active
-customer snapshots. Detailed P&L classifications, bookings, retention/movement
-analysis and workforce reporting remain later components of this milestone.
+customer snapshots; lesson 5 adds bookings. Detailed P&L classifications,
+retention/movement analysis and workforce reporting remain later components of this milestone.
 
 ## Lesson 1 practice: query the view
 
@@ -350,6 +350,86 @@ Both views were verified in `us-south1` with 59-day expiration. Local evidence i
 in the ignored `data/local/arr_reconciliation.json` file. Billing remains disabled
 and the existing 50 MiB per-query limit is unchanged.
 
-This lesson does not yet report bookings, an ARR movement bridge, GRR or NRR.
-Those need additional event and customer-cohort rules; net ARR growth alone
-does not explain new business versus expansion or churn.
+The ARR model does not itself report bookings, an ARR movement bridge, GRR or NRR.
+Lesson 5 handles booking events separately. Net ARR growth alone does not explain
+new business versus expansion or churn; retention needs customer-cohort rules.
+
+## Lesson 5: bookings versus revenue and ARR
+
+The user completed the ARR report. We now summarize signed contract bookings by
+month and compare them with revenue and ARR from the earlier lessons.
+
+### Why the measures differ
+
+For a $12,000 annual subscription signed and starting in January in this scenario:
+
+| Measure | January amount | Meaning |
+| --- | ---: | --- |
+| Bookings | $12,000 | Full signed contract value recorded when the deal closes |
+| Recognized revenue | $1,000 | One month's service delivered |
+| ARR | $12,000 | Annualized recurring subscription balance |
+
+A flat renewal can create $12,000 of renewal bookings with **zero increase in ARR**.
+Total bookings therefore includes new business and renewals separately. It is not
+net new ARR. Monthly bookings and revenue are flows and can be summed across months;
+ARR is a balance and cannot. These definitions are specific to this project's
+12-month, fixed-price contracts with signing and service starting in the same month.
+
+### What dbt built
+
+- `staging.stg_bookings`: one row per signed contract booking.
+- `finance.rpt_bookings_monthly`: monthly event counts and booked value, split
+  into New business and Renewal, with total bookings.
+
+The model reuses `staging.stg_customer_monthly` for the reporting months. In
+`dbt/models/marts/rpt_bookings_monthly.sql`, read the steps:
+
+1. `months` selects each reporting month once, even though there are many customers.
+2. `bookings` groups events by month and calculates new/renewal subtotals.
+3. A `LEFT JOIN` from the months list keeps months without bookings. `COALESCE`
+   fills those missing values with zero. This prevents blank months disappearing
+   from a trend chart and prevents customer rows multiplying booking values.
+
+`booking_count` counts contract events, not active customers. Bookings before the
+reporting window are excluded even if their contracts still generate revenue.
+
+### Your next action
+
+Open **`sql/bigquery/05_bookings_revenue_arr.sql`**, copy its SQL into BigQuery and
+run it. The query joins three reports that each have one row per month, so their
+join does not multiply amounts. It requires the P&L and ARR lessons to be built.
+Expect 24 rows with new bookings, renewal bookings, total bookings, revenue and ARR.
+
+For January 2025, expect six bookings: one new contract and five renewals.
+
+| New bookings | Renewal bookings | Total bookings |
+| ---: | ---: | ---: |
+| $125,520.00 | $355,206.00 | $480,726.00 |
+
+Compare this with January's $396,952.35 recognized revenue. The amounts differ
+because bookings capture whole contracts signed that month; revenue includes
+monthly service from both newly signed and earlier active contracts.
+
+### Rebuild and validation
+
+```bash
+cd /Users/jackperry/Documents/Codex/saas-finance-data-platform
+.venv-dbt/bin/python scripts/dbt_lesson.py --lesson bookings
+```
+
+The live build passed **34 steps: three views, 30 data tests and one unit test**.
+The views include the existing customer-month dependency and the two new models.
+Tests check unique booking/contract IDs, allowed types, customer references and
+the full in-window contract population. Each booking must match its contract and
+Closed Won opportunity in customer, amount, date and new/renewal classification.
+
+The unit test includes a month with no bookings and multiple customer rows for
+one calendar month. It verifies zeros are retained, amounts are not multiplied,
+and a renewal contributes its full contract value to the renewal subtotal.
+The existing billing, region, expiration and 50 MiB query limits remain in place.
+
+An independent Python calculation from local contracts/opportunities matched all
+24 months, 183 events and the new/renewal splits. Total bookings across the window
+are $13,760,862.00. The comparison query returned 24 rows with complete revenue/ARR
+matches. Both new views were verified in `us-south1` with 59-day expiration.
+Local evidence is saved in the ignored `data/local/bookings_reconciliation.json`.

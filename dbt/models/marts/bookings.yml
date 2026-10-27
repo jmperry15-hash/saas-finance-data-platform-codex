@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: rpt_bookings_monthly
+    description: >
+      One row per reporting month; total full contract bookings split between new
+      business and renewals. Months without events have zero counts and amounts.
+      This is signed contract value, not recognized revenue, cash collections or net new ARR.
+    columns:
+      - name: month
+        data_tests: [not_null, unique]
+      - name: total_bookings_cents
+        data_tests: [not_null]
+      - name: new_bookings_cents
+        data_tests: [not_null]
+      - name: renewal_bookings_cents
+        data_tests: [not_null]
+      - name: booking_count
+        data_tests: [not_null]
+
+unit_tests:
+  - name: bookings_keep_zero_months_and_separate_renewals
+    model: rpt_bookings_monthly
+    given:
+      - input: ref('stg_customer_monthly')
+        rows:
+          - {customer_id: A, month: '2025-01-01'}
+          - {customer_id: B, month: '2025-01-01'}
+          - {customer_id: A, month: '2025-02-01'}
+          - {customer_id: A, month: '2025-03-01'}
+      - input: ref('stg_bookings')
+        rows:
+          - {booking_id: B1, month: '2025-01-01', booking_type: New business, booked_value_cents: 1200000}
+          - {booking_id: B2, month: '2025-01-01', booking_type: Renewal, booked_value_cents: 2400000}
+          - {booking_id: B3, month: '2025-03-01', booking_type: Renewal, booked_value_cents: 1200000}
+    expect:
+      rows:
+        - {month: '2025-01-01', booking_count: 2, new_booking_count: 1, renewal_booking_count: 1, total_bookings_cents: 3600000, new_bookings_cents: 1200000, renewal_bookings_cents: 2400000}
+        - {month: '2025-02-01', booking_count: 0, new_booking_count: 0, renewal_booking_count: 0, total_bookings_cents: 0, new_bookings_cents: 0, renewal_bookings_cents: 0}
+        - {month: '2025-03-01', booking_count: 1, new_booking_count: 0, renewal_booking_count: 1, total_bookings_cents: 1200000, new_bookings_cents: 0, renewal_bookings_cents: 1200000}

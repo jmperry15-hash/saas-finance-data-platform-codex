@@ -9,7 +9,7 @@ reuses the existing raw dataset location instead of requiring US; see the
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
 relational data, BigQuery, dbt, automation, and Streamlit.
 
-**Status: monthly P&L, BUD2025 comparison, and ARR/customer report built and tested (October 26).**
+**Status: P&L, BUD2025 comparison, ARR/customers, and bookings reports built and tested (October 26).**
 The user's Cloud Shell output confirms all 14 tables loaded in `us-south1`, with
 matching schemas and row counts. The user also confirmed 16,648 GL lines and
 $77,741,040.10 per side, with zero difference, through BigQuery SQL.
@@ -28,6 +28,9 @@ remaining financial dbt models, Actions, and dashboard remain planned.
 The monthly ARR report passes 13 data tests and one unit test. All 24 months of
 MRR, ARR, active customers and growth match the underlying local contracts;
 MRR also reconciles to the GL revenue for this synthetic scenario.
+Bookings are now separated into new business and renewals. The lesson passes
+30 data tests and one unit test; all 24 months and 183 events reconcile to local
+contracts and opportunities. A comparison query displays bookings, revenue and ARR.
 All company and person records are fictional. There are no live source-system integrations.
 
 ## Proposed architecture
@@ -73,12 +76,12 @@ Finish and understand each gate before starting the next milestone.
 | **2. Relational SQL — lab ready** | CSVs loaded into local SQLite; eight SQL lessons | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Technical checks pass; complete the guided practice before moving on |
 | **3. BigQuery Sandbox — uploads and GL verified** | All 14 raw tables loaded; user confirmed GL SQL totals | Datasets, schemas, warehouse vs operational DB, dry runs | Row counts and GL pass; query-cost review and detailed finance checks remain |
 | **4. Python ingestion and API practice — core exercises verified** | Pandas and GL refresh/rerun; six-page customer extraction | Types, API responses, retries, idempotency, logging | Success path verified; manual failure practice skipped; API-to-warehouse integration deferred |
-| **5. dbt Core — in progress** | Staging views, monthly P&L, BUD2025 comparison, ARR/active customers | `ref`, `source`, grain, joins, window functions and tests | Finance and ARR controls pass; bookings, retention, workforce and further plan selection remain |
+| **5. dbt Core — in progress** | Staging views, monthly P&L, BUD2025, ARR/customers and bookings | `ref`, `source`, grain, joins, window functions and tests | Finance and SaaS reports pass; retention, workforce and further plan selection remain |
 | 6. GitHub Actions | CI first; manual refresh next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The current exercise is [milestone 5, lesson 4](docs/milestone_05.md#lesson-4-arr-and-active-customers): query the
-monthly ARR report and understand balances versus flows and `LAG`. Earlier cloud uploads and Python refreshes
+The current exercise is [milestone 5, lesson 5](docs/milestone_05.md#lesson-5-bookings-versus-revenue-and-arr): compare
+bookings with revenue and ARR, and understand full-value renewals. Earlier cloud uploads and Python refreshes
 are evidenced by user screenshots/SQL confirmations and live read-only checks.
 
 ## Folder structure

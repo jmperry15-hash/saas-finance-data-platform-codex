@@ -34,3 +34,12 @@ sources:
     tables:
       - name: customers
       - name: customer_monthly
+      - name: bookings
+      - name: contracts
+        columns:
+          - name: contract_id
+            data_tests: [not_null, unique]
+      - name: opportunities
+        columns:
+          - name: opportunity_id
+            data_tests: [not_null, unique]

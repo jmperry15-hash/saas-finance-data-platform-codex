@@ -19,7 +19,7 @@ EXPIRATION_MS = 59 * 86400000
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--lesson", choices=("departments", "pnl", "budget", "arr"), default="departments")
+    parser.add_argument("--lesson", choices=("departments", "pnl", "budget", "arr", "bookings"), default="departments")
     args = parser.parse_args()
     profile_dir = ROOT / "config/dbt"
     profile = profile_dir / "profiles.yml"
@@ -50,11 +50,13 @@ def main():
         if source.location != LOCATION or source.num_rows != 6:
             raise ValueError("Expected the six source departments in us-south1.")
         datasets = ["staging"]
-        if args.lesson in ("pnl", "budget", "arr"):
+        if args.lesson in ("pnl", "budget", "arr", "bookings"):
             sources = (["raw_salesforce.customers", "raw_salesforce.customer_monthly"]
-                       if args.lesson == "arr" else ["raw_netsuite.accounts", "raw_netsuite.gl_lines"])
+                       if args.lesson in ("arr", "bookings") else ["raw_netsuite.accounts", "raw_netsuite.gl_lines"])
             if args.lesson == "budget":
                 sources += ["raw_pigment.versions", "raw_pigment.financial_plan"]
+            if args.lesson == "bookings":
+                sources += ["raw_salesforce.bookings", "raw_salesforce.contracts", "raw_salesforce.opportunities"]
             for table_name in sources:
                 table = client.get_table(f"{PROJECT}.{table_name}", timeout=30)
                 if table.location != LOCATION or not table.num_rows:
@@ -78,7 +80,8 @@ def main():
 
     selection = {"departments": "+stg_departments", "pnl": "+rpt_pnl_monthly",
                  "budget": "+fct_budget_vs_actual",
-                 "arr": "+rpt_arr_monthly source:salesforce"}[args.lesson]
+                 "arr": "+rpt_arr_monthly source:salesforce.customers",
+                 "bookings": "+rpt_bookings_monthly source:salesforce.customers source:salesforce.contracts source:salesforce.opportunities"}[args.lesson]
     print(f"Billing disabled; sources and datasets checked. Building {args.lesson} lesson.", flush=True)
     subprocess.run([
         str(ROOT / ".venv-dbt/bin/dbt"), "build",

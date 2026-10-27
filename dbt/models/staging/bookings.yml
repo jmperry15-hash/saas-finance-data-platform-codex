@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: stg_bookings
+    description: >
+      One event per signed contract. Includes full 12-month new and renewal value.
+      In this synthetic scenario the signature/close month equals the service start.
+      A renewal booking does not necessarily increase ARR.
+    columns:
+      - name: booking_id
+        data_tests: [not_null, unique]
+      - name: contract_id
+        data_tests: [not_null, unique]
+      - name: opportunity_id
+        data_tests: [not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('salesforce', 'customers')
+                field: customer_id
+      - name: month
+        data_tests: [not_null]
+      - name: booked_value_cents
+        data_tests: [not_null]
+      - name: booking_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['New business', 'Renewal']

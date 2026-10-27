@@ -24,7 +24,10 @@ Other version selections and detailed functional classifications remain future w
 Lesson 4 added customer/month staging and `finance.rpt_arr_monthly` for MRR, ARR,
 active customers and month-over-month growth. Thirteen data tests and one unit test
 pass. All 24 months reconcile independently to local contracts and MRR ties to
-GL revenue for this generator; bookings, ARR movements and cohort retention remain unbuilt.
+GL revenue for this generator. Lesson 5 adds booking-event staging and
+`finance.rpt_bookings_monthly`, separating new business and full-value renewals.
+Thirty data tests and one unit test pass; 24 monthly totals and 183 events match
+local contracts/opportunities. ARR movements and cohort retention remain unbuilt.
 API-to-warehouse integration, all-source refresh, remaining financial models,
 automation and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
