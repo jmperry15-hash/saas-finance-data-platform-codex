@@ -29,9 +29,9 @@ creation plus five tests. Live metadata confirms the result is a VIEW with the
 three expected columns and a 59-day expiration. Billing was confirmed disabled
 with no linked account before creating the staging dataset or running dbt.
 
-This completed the first component. Lesson 2 below adds accounting staging and a
-monthly operating P&L. Budget comparisons, detailed P&L classifications, ARR/bookings
-and workforce reporting remain later components of this milestone.
+This completed the first component. Lesson 2 adds accounting staging and a monthly
+operating P&L; lesson 3 adds the BUD2025 comparison. Detailed P&L classifications,
+ARR/bookings and workforce reporting remain later components of this milestone.
 
 ## Lesson 1 practice: query the view
 
@@ -180,3 +180,94 @@ template and update that limit; the helper deliberately rejects a mismatched pro
 
 References: [dbt data test configuration](https://docs.getdbt.com/reference/resource-properties/data-tests),
 [BigQuery model configuration](https://docs.getdbt.com/reference/resource-configs/bigquery-configs).
+
+## Lesson 3: compare 2025 actuals with budget
+
+The user's version query confirmed that **BUD2025** is a Budget covering January
+through December 2025. FC2025H2 is a separate July–December forecast. This lesson
+deliberately fixes BUD2025 in the model; selecting a different version is future work.
+
+### What we built and where
+
+The SQL lives locally in `dbt/models/`. dbt sends that SQL to BigQuery, where the
+views run. Local Git tracks the changes; there is still no GitHub remote.
+
+| Model | Purpose |
+| --- | --- |
+| `staging.stg_plan_versions` | Preserve the version list and covered dates |
+| `staging.stg_financial_plan` | Preserve budget/forecast amounts and version IDs |
+| `finance.fct_pnl_monthly` | Aggregate GL actuals to month × department × account |
+| `finance.fct_budget_vs_actual` | Compare the two sides at that same grain for BUD2025 |
+
+`rpt_pnl_monthly` from lesson 2 is the company-wide monthly summary. The new
+`fct_pnl_monthly` retains account and department detail needed for the budget join.
+
+### Read the main SQL model
+
+Open `dbt/models/marts/fct_budget_vs_actual.sql` and follow its named sections:
+
+1. `selected_version` chooses BUD2025 and its date range.
+2. `actual` limits the aggregated GL to those dates.
+3. `budget` selects only that budget's records.
+4. `combined` uses a **FULL OUTER JOIN** on month, department and account. It keeps
+   rows found on only one side. `COALESCE` supplies zero for the missing amount,
+   while `coverage` records whether the row is Both, Actual only or Budget only.
+5. The final SELECT calculates the variances and adds account descriptions.
+
+Aggregating actuals before joining avoids repeating a monthly budget against every
+individual journal line. Both input keys are controlled through tests.
+
+| Measure | Definition |
+| --- | --- |
+| `variance_cents` | Actual minus budget, for both revenue and expense |
+| `variance_ratio` | Variance / budget; NULL when budget is zero |
+| `favorable_variance_cents` | Revenue: actual minus budget. Expense: budget minus actual |
+
+A positive favorable variance means favorable; negative means unfavorable. The
+ratio is not additive: when summarizing rows, divide summed variance by summed
+budget rather than summing or averaging the row ratios. Do not combine revenue
+and expenses as though their dollar variances have the same favorable sign.
+
+### Your next action
+
+Paste the query from `sql/bigquery/03_budget_vs_actual.sql` into BigQuery. It returns
+24 summary rows: 12 months × Revenue/Expense. January 2025 should show:
+
+| Type | Actual | Budget | Actual minus budget | Favorable variance |
+| --- | ---: | ---: | ---: | ---: |
+| Revenue | $396,952.35 | $262,500.00 | $134,452.35 | $134,452.35 |
+| Expense | $1,142,351.17 | $1,040,500.00 | $101,851.17 | -$101,851.17 |
+
+Explain why both dollar variances are positive, but only one is favorable. Then
+inspect one department/account row to connect a detailed variance with the summary.
+
+### Rebuild and test
+
+```bash
+cd /Users/jackperry/Documents/Codex/saas-finance-data-platform
+.venv-dbt/bin/python scripts/dbt_lesson.py --lesson budget
+```
+
+The helper keeps the existing billing, region, expiration and 50 MiB per-query
+controls. It selects `+fct_budget_vs_actual`, including upstream models. Cautious
+test selection includes tests only when all their inputs belong to this build,
+so this lesson does not depend on the earlier report already existing.
+
+Data tests check real keys, plan scope and raw-to-report amounts. A dbt **unit test**
+uses small invented examples to check actual-only rows, budget-only rows, zero
+budgets, date boundaries, forecast exclusion and favorable/unfavorable signs.
+These examples are test inputs, not extra records uploaded into the raw tables.
+The current generated 2025 data has 300 comparison rows, all with Both coverage;
+the unit test exercises missing-side cases that these data do not contain.
+
+The final live build passed **44 steps: six views, 37 data tests and one unit test**.
+The six views include two existing accounting dependencies and four new models.
+An initial validation-query syntax error was corrected before the successful build;
+dbt blocked the dependent comparison until the check passed.
+An independent Python aggregation of the original CSVs matched all 300 live rows,
+including coverage, favorable variance and rounded variance ratios. The summary
+query also returned the expected 24 rows. All four new views were verified in
+`us-south1` with 59-day expiration. Local evidence is saved in the ignored
+`data/local/budget_reconciliation.json` file.
+
+Reference: [dbt unit tests](https://docs.getdbt.com/docs/build/unit-tests).

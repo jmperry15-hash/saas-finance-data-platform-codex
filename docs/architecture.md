@@ -17,8 +17,10 @@ user confirmed successful extraction and skipped manual failure practice. The fi
 dbt department staging view and five data tests passed live on October 26.
 Accounting staging and `finance.rpt_pnl_monthly` subsequently passed 18 data tests;
 all 24 monthly results match an independent local CSV calculation exactly in cents.
-This first report summarizes revenue, total expenses and operating profit; the
-detailed fact grains and classifications below remain the target design.
+The summary reports revenue, total expenses and operating profit. Lesson 3 added
+`fct_pnl_monthly` at month/department/account grain and `fct_budget_vs_actual`, fixed
+to BUD2025. Its 37 data tests and one unit test pass, including the upstream controls.
+Other version selections and detailed functional classifications remain future work.
 API-to-warehouse integration, all-source refresh, remaining financial models,
 automation and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.

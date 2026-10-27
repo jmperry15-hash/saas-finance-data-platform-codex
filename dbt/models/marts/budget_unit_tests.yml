@@ -1,0 +1,40 @@
+version: 2
+
+unit_tests:
+  - name: budget_keeps_unmatched_rows_and_handles_signs
+    description: Tests zero budgets, unmatched keys, favorable signs, date scope and forecast exclusion.
+    model: fct_budget_vs_actual
+    given:
+      - input: ref('stg_plan_versions')
+        rows:
+          - {version_id: BUD2025, scenario: Budget, start_month: '2025-01-01', end_month: '2025-12-01'}
+          - {version_id: FC2025H2, scenario: Forecast, start_month: '2025-07-01', end_month: '2025-12-01'}
+      - input: ref('stg_accounts')
+        rows:
+          - {account_id: '4000', account_name: Revenue, account_type: Revenue}
+          - {account_id: '6000', account_name: Salary, account_type: Expense}
+      - input: ref('fct_pnl_monthly')
+        rows:
+          - {month: '2025-01-01', department_id: D01, account_id: '6000', actual_cents: 120}
+          - {month: '2025-01-01', department_id: D02, account_id: '4000', actual_cents: 150}
+          - {month: '2025-01-01', department_id: D03, account_id: '6000', actual_cents: 25}
+          - {month: '2025-01-01', department_id: D05, account_id: '6000', actual_cents: 0}
+          - {month: '2025-01-01', department_id: D06, account_id: '4000', actual_cents: 50}
+          - {month: '2024-12-01', department_id: D01, account_id: '6000', actual_cents: 999}
+          - {month: '2026-01-01', department_id: D01, account_id: '6000', actual_cents: 999}
+      - input: ref('stg_financial_plan')
+        rows:
+          - {version_id: BUD2025, month: '2025-01-01', department_id: D01, account_id: '6000', amount_cents: 100}
+          - {version_id: BUD2025, month: '2025-01-01', department_id: D02, account_id: '4000', amount_cents: 100}
+          - {version_id: BUD2025, month: '2025-01-01', department_id: D04, account_id: '6000', amount_cents: 40}
+          - {version_id: BUD2025, month: '2025-01-01', department_id: D05, account_id: '6000', amount_cents: 0}
+          - {version_id: BUD2025, month: '2025-01-01', department_id: D06, account_id: '4000', amount_cents: 100}
+          - {version_id: FC2025H2, month: '2025-07-01', department_id: D01, account_id: '6000', amount_cents: 999}
+    expect:
+      rows:
+        - {version_id: BUD2025, month: '2025-01-01', department_id: D01, actual_cents: 120, budget_cents: 100, variance_cents: 20, variance_ratio: 0.2, favorable_variance_cents: -20, coverage: Both}
+        - {version_id: BUD2025, month: '2025-01-01', department_id: D02, actual_cents: 150, budget_cents: 100, variance_cents: 50, variance_ratio: 0.5, favorable_variance_cents: 50, coverage: Both}
+        - {version_id: BUD2025, month: '2025-01-01', department_id: D03, actual_cents: 25, budget_cents: 0, variance_cents: 25, variance_ratio: null, favorable_variance_cents: -25, coverage: Actual only}
+        - {version_id: BUD2025, month: '2025-01-01', department_id: D04, actual_cents: 0, budget_cents: 40, variance_cents: -40, variance_ratio: -1, favorable_variance_cents: 40, coverage: Budget only}
+        - {version_id: BUD2025, month: '2025-01-01', department_id: D05, actual_cents: 0, budget_cents: 0, variance_cents: 0, variance_ratio: null, favorable_variance_cents: 0, coverage: Both}
+        - {version_id: BUD2025, month: '2025-01-01', department_id: D06, actual_cents: 50, budget_cents: 100, variance_cents: -50, variance_ratio: -0.5, favorable_variance_cents: -50, coverage: Both}

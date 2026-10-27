@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: fct_pnl_monthly
+    description: Monthly P&L actuals at department/account grain; revenue and expenses use presentation signs.
+    columns:
+      - name: month
+        data_tests: [not_null]
+      - name: department_id
+        data_tests: [not_null]
+      - name: account_id
+        data_tests: [not_null]
+      - name: actual_cents
+        data_tests: [not_null]
+
+  - name: fct_budget_vs_actual
+    description: >
+      BUD2025 only, one row per month/department/account present in either actuals
+      or budget. Missing side becomes zero and coverage preserves its meaning.
+    columns:
+      - name: version_id
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['BUD2025']
+      - name: variance_ratio
+        description: (Actual minus budget) / budget; NULL for zero budget. Not additive.
+      - name: favorable_variance_cents
+        description: Positive is favorable, negative is unfavorable, zero is on budget.
+      - name: coverage
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Both', 'Actual only', 'Budget only']

@@ -18,3 +18,11 @@ sources:
         description: One row per chart-of-accounts ID.
       - name: gl_lines
         description: One row per journal line; amounts are integer USD cents.
+
+  - name: pigment
+    description: Synthetic planning versions and financial plans.
+    database: saas-finance-learning-512616
+    schema: raw_pigment
+    tables:
+      - name: versions
+      - name: financial_plan

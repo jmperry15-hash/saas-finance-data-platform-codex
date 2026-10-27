@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_plan_versions
+    description: One row per budget or forecast version with its covered dates.
+    columns:
+      - name: version_id
+        data_tests: [not_null, unique]
+      - name: scenario
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Budget', 'Forecast']
+      - name: start_month
+        data_tests: [not_null]
+      - name: end_month
+        data_tests: [not_null]
+
+  - name: stg_financial_plan
+    description: One amount per version, month, department and account; USD cents.
+    columns:
+      - name: version_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_plan_versions')
+                field: version_id
+      - name: month
+        data_tests: [not_null]
+      - name: department_id
+        data_tests: [not_null]
+      - name: account_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: amount_cents
+        data_tests: [not_null]
