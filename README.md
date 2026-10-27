@@ -70,6 +70,13 @@ constraints in SQLite before comparing them with an analytical warehouse.
 See [architecture and cost safeguards](docs/architecture.md) for dataset design,
 metric definitions, refresh design, security, and free-tier limits.
 
+Download the [three-page data lineage PDF](output/pdf/saas_finance_lineage.pdf)
+or [high-resolution lineage image](output/pdf/saas_finance_lineage.png).
+These show the implemented Python paths, all 14 raw tables, all 14 dbt models,
+SQL reporting queries, and planned components as of October 26. The diagram
+builder in `scripts/build_lineage_diagram.py` checks its 22 direct model edges
+against the actual SQL; it requires ReportLab only for document generation.
+
 ## Milestones and acceptance gates
 
 Finish and understand each gate before starting the next milestone.
