@@ -25,7 +25,8 @@ is built and tested. The accounting staging views and first monthly P&L also pas
 The BUD2025 comparison also passed 37 data tests and one unit test, including its
 upstream controls. It retains month/department/account detail and separates raw
 variance from favorable variance. API-to-warehouse loading, all-source refresh,
-remaining financial dbt models, Actions, and dashboard remain planned.
+further financial dbt enhancements and the dashboard remain planned.
+A manual Actions validation workflow is now prepared locally; its hosted run is pending.
 The monthly ARR report passes 13 data tests and one unit test. All 24 months of
 MRR, ARR, active customers and growth match the underlying local contracts;
 MRR also reconciles to the GL revenue for this synthetic scenario.
@@ -79,13 +80,15 @@ Finish and understand each gate before starting the next milestone.
 | **2. Relational SQL — lab ready** | CSVs loaded into local SQLite; eight SQL lessons | `SELECT`, `JOIN`, `GROUP BY`, keys, grain, window functions | Technical checks pass; complete the guided practice before moving on |
 | **3. BigQuery Sandbox — uploads and GL verified** | All 14 raw tables loaded; user confirmed GL SQL totals | Datasets, schemas, warehouse vs operational DB, dry runs | Row counts and GL pass; query-cost review and detailed finance checks remain |
 | **4. Python ingestion and API practice — core exercises verified** | Pandas and GL refresh/rerun; six-page customer extraction | Types, API responses, retries, idempotency, logging | Success path verified; manual failure practice skipped; API-to-warehouse integration deferred |
-| **5. dbt Core — in progress** | Staging views, P&L, BUD2025, ARR/customers, bookings and workforce | `ref`, `source`, grain, joins, window functions and tests | Finance, SaaS and payroll controls pass; retention, headcount plans and further plan selection remain |
-| 6. GitHub Actions | CI first; manual refresh next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
+| **5. dbt Core — core reporting built** | Staging views, P&L, BUD2025, ARR/customers, bookings and workforce | `ref`, `source`, grain, joins, window functions and tests | Lesson builds and reconciliations pass; optional retention and additional plan models deferred |
+| **6. GitHub Actions — first workflow prepared** | CI first; complete refresh pipeline next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
 
-The current exercise is [milestone 5, lesson 6](docs/milestone_05.md#lesson-6-headcount-fte-and-personnel-costs): compare
-headcount with FTE and reconcile personnel costs to the GL. Earlier cloud uploads and Python refreshes
-are evidenced by user screenshots/SQL confirmations and live read-only checks.
+The current exercise is [milestone 6, lesson 1](docs/milestone_06.md): connect
+the repository to GitHub and learn how a workflow runs existing checks.
+Read the [project status](docs/project_status.md) for completed work, evidence
+and remaining scope. Earlier cloud uploads and Python refreshes are evidenced
+by user screenshots/SQL confirmations and prior live read-only checks.
 
 ## Folder structure
 
@@ -122,9 +125,11 @@ saas-finance-data-platform/
 ```
 
 The later lessons have added `src/ingestion/`, `scripts/`, `config/dbt/`, and
-`dbt/` with the first staging model and tests. `requirements-ingestion.txt` and
-`requirements-dbt.txt` describe the separate environments. Financial intermediate
-and mart models, `.github/workflows/`, and `dashboard/` are still future work.
+`dbt/` with 14 staging/reporting models and their tests. `requirements-ingestion.txt`
+and `requirements-dbt.txt` describe the separate environments.
+`.github/workflows/validate.yml` contains the manual validation workflow.
+`docs/milestone_06.md` explains automation; `docs/project_status.md` tracks remaining
+work. The Streamlit `dashboard/` is still future work.
 
 ## Run milestone 1
 
@@ -193,7 +198,8 @@ git push -u origin main
 
 Use GitHub's supported browser/credential-manager sign-in flow if prompted; do
 not paste a token into chat, a remote URL, or a source file. Public portfolio
-sharing is a later choice. No Actions workflow exists yet, so pushing this
-milestone does not trigger cloud refreshes or consume Actions minutes.
+sharing is a later choice. The validation workflow has only a manual trigger;
+pushing does not start a run. Check included Actions usage and block paid overages
+before its first hosted run. It does not refresh BigQuery.
 
-Continue with [milestone 5: the first dbt model](docs/milestone_05.md).
+Continue with [milestone 6: automation](docs/milestone_06.md).
