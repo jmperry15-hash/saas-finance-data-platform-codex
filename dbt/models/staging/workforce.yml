@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_employee_monthly
+    description: >
+      Employees on the synthetic monthly payroll. Hires start on month boundaries;
+      the termination month is included as the last paid month. No mid-month proration.
+    columns:
+      - name: employee_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('workday', 'employees')
+                field: employee_id
+      - name: month
+        data_tests: [not_null]
+      - name: department_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_departments')
+                field: department_id
+      - name: fte_basis_points
+        data_tests: [not_null]
+      - name: base_pay_cents
+        data_tests: [not_null]
+      - name: bonus_cents
+        data_tests: [not_null]
+      - name: benefits_cents
+        data_tests: [not_null]
+      - name: personnel_cost_cents
+        data_tests: [not_null]

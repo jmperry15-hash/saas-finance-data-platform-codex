@@ -31,8 +31,9 @@ with no linked account before creating the staging dataset or running dbt.
 
 This completed the first component. Lesson 2 adds accounting staging and a monthly
 operating P&L; lesson 3 adds the BUD2025 comparison; lesson 4 adds ARR and active
-customer snapshots; lesson 5 adds bookings. Detailed P&L classifications,
-retention/movement analysis and workforce reporting remain later components of this milestone.
+customer snapshots; lesson 5 adds bookings; lesson 6 adds workforce reporting.
+Detailed P&L classifications, retention/movement analysis and headcount-plan
+comparisons remain later components of this milestone.
 
 ## Lesson 1 practice: query the view
 
@@ -433,3 +434,105 @@ An independent Python calculation from local contracts/opportunities matched all
 are $13,760,862.00. The comparison query returned 24 rows with complete revenue/ARR
 matches. Both new views were verified in `us-south1` with 59-day expiration.
 Local evidence is saved in the ignored `data/local/bookings_reconciliation.json`.
+
+## Lesson 6: headcount, FTE and personnel costs
+
+We now connect the synthetic Workday data to the financial reports. The new views
+are `staging.stg_employee_monthly` (one employee per month) and
+`finance.rpt_workforce_monthly` (one department per month).
+
+### Definitions first
+
+| Measure | Definition in this project |
+| --- | --- |
+| Headcount | Number of employees represented on that month's payroll |
+| FTE | Sum of capacity: full time = 1.0; an 80% employee = 0.8 |
+| Personnel cost | Base pay + bonus + employer benefits/payroll taxes |
+
+Hires start on the first of a month, and termination dates are the last paid day
+at month end. The termination month is included; the following month is excluded.
+We do not model mid-month proration or daily headcount movements. A real company's
+headcount reporting policy must specify its exact effective-date convention.
+
+FTE is stored in **basis points**: 10,000 = 1.0 FTE, 8,000 = 0.8 FTE. This keeps
+the source numeric representation exact, just as integer cents do for money.
+We divide by 10,000 for display. Two people working 100% and 80% give **2 headcount
+and 1.8 FTE**.
+
+### Read the model
+
+Open `dbt/models/marts/rpt_workforce_monthly.sql`:
+
+1. `months` gets the distinct finance reporting periods from the GL.
+2. `workforce` groups employee rows by month and department. `COUNT(*)` counts
+   people, while `SUM(fte_basis_points)` measures capacity. Tests enforce one row
+   per employee/month so headcount cannot be inflated by duplicate payroll rows.
+3. `CROSS JOIN` creates every month/department combination. Here, 24 months × six
+   departments = 144 rows. Unlike an accidental many-to-many join, this is an
+   intentional grid used to preserve empty departments.
+4. `LEFT JOIN` attaches the aggregated payroll. Missing combinations display zero.
+
+Headcount and FTE can be summed across departments **within one month**. Do not
+sum them across months and call the result annual headcount. Personnel expenses
+are monthly flows and can be summed across months.
+
+### Your next action
+
+Copy **`sql/bigquery/06_workforce_summary.sql`** into BigQuery and run it.
+This summarizes the departmental view into 24 company-wide monthly rows.
+
+| Month | Headcount | FTE | Personnel expense |
+| --- | ---: | ---: | ---: |
+| October 2024 | 75 | 74.0 | $933,404.26 |
+| September 2026 | 88 | 87.0 | $1,201,872.52 |
+
+Then inspect the departmental breakdown for one month:
+
+```sql
+SELECT
+  department_name,
+  headcount,
+  CAST(fte_basis_points AS NUMERIC) / 10000 AS fte,
+  CAST(personnel_cost_cents AS NUMERIC) / 100 AS personnel_cost_usd
+FROM `saas-finance-learning-512616.finance.rpt_workforce_monthly`
+WHERE month = DATE '2026-09-01'
+ORDER BY department_name;
+```
+
+Explain why September has 88 people but 87.0 FTE. Both are correct: the difference
+comes from employees working less than full time.
+
+### Reconcile, do not double-count
+
+Workday personnel costs explain amounts that are **already in the GL**:
+
+| Workday component | GL account |
+| --- | --- |
+| Base pay | 6000 |
+| Bonus / variable compensation | 6010 |
+| Employer benefits and payroll taxes | 6020 |
+
+Adding Workday costs to GL expenses would count payroll twice. We test equality
+at employee × month × department × account, then use the personnel data for
+headcount/capacity explanations and drilldowns.
+
+### Rebuild and validation
+
+```bash
+cd /Users/jackperry/Documents/Codex/saas-finance-data-platform
+.venv-dbt/bin/python scripts/dbt_lesson.py --lesson workforce
+```
+
+The live build passed **29 steps: three views, 25 data tests and one unit test**.
+One view is the reused department model. Tests cover roster membership and dates,
+unique employee/month keys, FTE ranges, component totals, department references,
+report completeness and exact GL reconciliation. The unit test covers two people
+with 1.8 combined FTE, duplicate calendar input rows and empty departments.
+An independent local calculation from the employee roster and GL matched all
+144 department/month rows, including every cost component and FTE. The display
+query returned 24 monthly rows. Both new views were verified in `us-south1` with
+59-day expiration; billing remains disabled and the 50 MiB query cap is unchanged.
+Evidence is saved locally in the ignored `data/local/workforce_reconciliation.json`.
+
+Headcount budgets, hiring/attrition bridges and personnel variance drivers are
+later exercises. This lesson reports actual workforce and personnel expenses.

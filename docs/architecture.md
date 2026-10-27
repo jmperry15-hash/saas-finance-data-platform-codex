@@ -28,6 +28,10 @@ GL revenue for this generator. Lesson 5 adds booking-event staging and
 `finance.rpt_bookings_monthly`, separating new business and full-value renewals.
 Thirty data tests and one unit test pass; 24 monthly totals and 183 events match
 local contracts/opportunities. ARR movements and cohort retention remain unbuilt.
+Lesson 6 adds employee/month staging and `finance.rpt_workforce_monthly`, with one
+row per department/month. Twenty-five data tests and one unit test pass, including
+employee-level GL reconciliation for base pay, bonus and employer benefits/taxes.
+Headcount counts employees on that month's payroll; FTE measures their capacity.
 API-to-warehouse integration, all-source refresh, remaining financial models,
 automation and dashboard remain planned. Sources
 and constraints were checked October 24, 2026; recheck them at the cloud setup gate.
@@ -77,7 +81,10 @@ compensation are omitted, so it is not a complete GAAP income statement.
 **Metric discipline:** ARR is month-end MRR × 12, never a sum of monthly ARR.
 Revenue is the service recognized during a period; bookings are the full contract
 value signed during that period, including renewals. Active customers have MRR > 0.
-Customer counts and headcount are month-end snapshots, not additive across months.
+Customer counts are monthly snapshot balances, not additive across months.
+Workforce headcount counts employees represented on monthly payroll: hires start
+on month boundaries and the termination month is included as the last paid month.
+Neither headcount nor FTE is additive across months. Mid-month proration is not modeled.
 NRR/GRR will compare a fixed beginning customer cohort to its ending MRR, excluding
 new customers, with unavailable percentages when starting MRR is zero.
 

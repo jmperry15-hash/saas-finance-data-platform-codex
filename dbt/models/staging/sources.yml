@@ -43,3 +43,14 @@ sources:
         columns:
           - name: opportunity_id
             data_tests: [not_null, unique]
+
+  - name: workday
+    description: Synthetic employee roster and monthly personnel costs.
+    database: saas-finance-learning-512616
+    schema: raw_workday
+    tables:
+      - name: employees
+        columns:
+          - name: employee_id
+            data_tests: [not_null, unique]
+      - name: employee_monthly

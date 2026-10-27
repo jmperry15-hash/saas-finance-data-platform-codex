@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: rpt_workforce_monthly
+    description: >
+      One row per finance month and department, including zero-payroll combinations.
+      Headcount counts employees represented on payroll in the month, including their
+      termination month. FTE is capacity, not a person count. Costs already appear in GL.
+    columns:
+      - name: headcount
+        data_tests: [not_null]
+      - name: fte_basis_points
+        data_tests: [not_null]
+      - name: personnel_cost_cents
+        data_tests: [not_null]
+
+unit_tests:
+  - name: workforce_counts_people_and_preserves_empty_departments
+    model: rpt_workforce_monthly
+    given:
+      - input: source('netsuite', 'gl_lines')
+        rows:
+          - {month: '2025-01-01'}
+          - {month: '2025-01-01'}
+          - {month: '2025-02-01'}
+      - input: ref('stg_departments')
+        rows:
+          - {department_id: D01, department_name: Support}
+          - {department_id: D02, department_name: Engineering}
+      - input: ref('stg_employee_monthly')
+        rows:
+          - {employee_id: A, month: '2025-01-01', department_id: D01, fte_basis_points: 10000, base_pay_cents: 100, bonus_cents: 10, benefits_cents: 25, personnel_cost_cents: 135}
+          - {employee_id: B, month: '2025-01-01', department_id: D01, fte_basis_points: 8000, base_pay_cents: 80, bonus_cents: 8, benefits_cents: 20, personnel_cost_cents: 108}
+          - {employee_id: A, month: '2025-02-01', department_id: D01, fte_basis_points: 10000, base_pay_cents: 100, bonus_cents: 10, benefits_cents: 25, personnel_cost_cents: 135}
+    expect:
+      rows:
+        - {month: '2025-01-01', department_id: D01, headcount: 2, fte_basis_points: 18000, base_pay_cents: 180, bonus_cents: 18, benefits_cents: 45, personnel_cost_cents: 243}
+        - {month: '2025-01-01', department_id: D02, headcount: 0, fte_basis_points: 0, base_pay_cents: 0, bonus_cents: 0, benefits_cents: 0, personnel_cost_cents: 0}
+        - {month: '2025-02-01', department_id: D01, headcount: 1, fte_basis_points: 10000, base_pay_cents: 100, bonus_cents: 10, benefits_cents: 25, personnel_cost_cents: 135}
+        - {month: '2025-02-01', department_id: D02, headcount: 0, fte_basis_points: 0, base_pay_cents: 0, bonus_cents: 0, benefits_cents: 0, personnel_cost_cents: 0}
