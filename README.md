@@ -1,54 +1,46 @@
 # Miniature SaaS Finance Data Platform
 
-**Current cloud status, October 24, 2026:** you disabled billing for
-`saas-finance-learning-512616`; the screenshot and subsequent uploader run show
-the billing gate passed. Continue without a billing override. The helper now
-reuses the existing raw dataset location instead of requiring US; see the
-[updated continuation command](docs/bigquery_bulk_upload.md).
+**Verified October 28, 2026:** one manual command now validates and refreshes
+all 14 BigQuery raw tables, builds/tests dbt, reconciles 4,047 dashboard rows,
+and rebuilds the local Data + Sites dashboard from actual warehouse results.
+The first complete run passed; billing remained disabled. Read the
+[manual refresh lesson](docs/manual_refresh.md).
 
 A hands-on learning project for Jack: connect familiar FP&A concepts to Python,
-relational data, BigQuery, dbt, automation, and Streamlit.
+relational data, BigQuery, dbt, automation, and financial dashboards. All company
+and person records are fictional; there are no live vendor integrations.
 
-**Status: finance, SaaS and workforce actuals built and tested in dbt (October 26).**
-The user's Cloud Shell output confirms all 14 tables loaded in `us-south1`, with
-matching schemas and row counts. The user also confirmed 16,648 GL lines and
-$77,741,040.10 per side, with zero difference, through BigQuery SQL.
-Manual query-cost review and customer-level cloud revenue reconciliation remain open.
-Monthly revenue and detailed employee/account payroll controls now pass.
-The [Pandas exercise and single-table Python loader](docs/milestone_04.md) are implemented.
-The user's two Python refresh outputs confirm unchanged row counts and GL totals.
-The [local mock API and extractor](docs/api_exercise.md) are implemented and tested;
-the user's successful six-page extraction is verified. Manual failure practice was
-skipped at the user's request. The [first dbt department view](docs/milestone_05.md)
-is built and tested. The accounting staging views and first monthly P&L also pass
-18 data tests; all 24 months match an independent local CSV aggregation exactly.
-The BUD2025 comparison also passed 37 data tests and one unit test, including its
-upstream controls. It retains month/department/account detail and separates raw
-variance from favorable variance. API-to-warehouse loading, all-source refresh,
-further financial dbt enhancements and the dashboard remain planned.
-A manual Actions validation workflow is now prepared locally; its hosted run is pending.
-The monthly ARR report passes 13 data tests and one unit test. All 24 months of
-MRR, ARR, active customers and growth match the underlying local contracts;
-MRR also reconciles to the GL revenue for this synthetic scenario.
-Bookings are now separated into new business and renewals. The lesson passes
-30 data tests and one unit test; all 24 months and 183 events reconcile to local
-contracts and opportunities. A comparison query displays bookings, revenue and ARR.
-Workforce reporting passes 25 data tests and one unit test. It reconciles personnel
-costs to the GL by employee/month/department/account and separates headcount from FTE.
-All company and person records are fictional. There are no live source-system integrations.
+The foundation includes 14 synthetic source tables, SQLite SQL exercises,
+BigQuery raw data, Pandas GL ingestion, a paginated mock customer API, 14 dbt
+models, a successful hosted GitHub validation run, and a Data + Sites dashboard.
+The current local suite passes 73 Python tests; dashboard calculations pass 186
+comparisons plus coverage/plan assertions. The hosted GitHub run applies to the
+earlier published commit, not these newer local changes.
 
-## Proposed architecture
+This portfolio update adds reproducible dashboard checks to the manual GitHub
+workflow. Follow [the fresh-clone lesson](docs/portfolio_validation.md). The main
+remaining work is verifying CI for this update, updating the private hosted
+dashboard, and completing the user walkthrough. A schedule is optional. See the
+[current project status](docs/project_status.md) for boundaries and evidence.
+
+## Current architecture
 
 ```mermaid
 flowchart LR
-    A[Mock NetSuite / Salesforce / Workday / Pigment] --> B[Python ingestion and validation]
+    A[Mock source CSVs] --> B[Python validation and loads]
     B --> C[BigQuery raw datasets]
-    C --> D[dbt staging views]
-    D --> E[dbt finance reporting models]
-    E --> F[Streamlit dashboard]
-    G[GitHub Actions: later] -. validate and refresh .-> B
-    G -. build and test .-> D
+    C --> D[dbt staging and finance views]
+    D --> F[Tested warehouse snapshot]
+    A --> E[Independent SQLite calculations]
+    E -. exact reconciliation .-> F
+    F --> G[Local Data + Sites dashboard]
+    H[GitHub Actions manual validation] -. checks generator and Python tests .-> A
 ```
+
+
+
+The local dashboard uses the saved warehouse export from the manual pipeline.
+The private hosted website still has its previous snapshot until republished.
 
 Python extracts and loads source data; dbt applies business transformations in
 the warehouse. That is **ELT**: extract, load, then transform. Small Python cleanup
@@ -65,7 +57,7 @@ constraints in SQLite before comparing them with an analytical warehouse.
 | API practice | Local mock HTTP API | Pagination, request errors, extraction without paid vendor access | Milestone 4 |
 | Transformation | dbt Core and `dbt-bigquery` | SQL models, dependency graph, tests, documentation | Milestone 5 |
 | Automation | GitHub Actions, standard Linux runners | Repeat validated local commands remotely | Milestone 6 |
-| Reporting | Streamlit, Pandas, charts | Finance dashboard with drilldowns and reconciled measures | Milestone 7 |
+| Reporting | Data + Sites | Finance dashboard with drilldowns and reconciled measures | Implemented; manual warehouse refresh passes |
 
 See [architecture and cost safeguards](docs/architecture.md) for dataset design,
 metric definitions, refresh design, security, and free-tier limits.
@@ -89,11 +81,11 @@ Finish and understand each gate before starting the next milestone.
 | **3. BigQuery Sandbox — uploads and GL verified** | All 14 raw tables loaded; user confirmed GL SQL totals | Datasets, schemas, warehouse vs operational DB, dry runs | Row counts and GL pass; query-cost review and detailed finance checks remain |
 | **4. Python ingestion and API practice — core exercises verified** | Pandas and GL refresh/rerun; six-page customer extraction | Types, API responses, retries, idempotency, logging | Success path verified; manual failure practice skipped; API-to-warehouse integration deferred |
 | **5. dbt Core — core reporting built** | Staging views, P&L, BUD2025, ARR/customers, bookings and workforce | `ref`, `source`, grain, joins, window functions and tests | Lesson builds and reconciliations pass; optional retention and additional plan models deferred |
-| **6. GitHub Actions — first workflow prepared** | CI first; complete refresh pipeline next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
-| 7. Streamlit | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Query caching, filters, chart design, communicating definitions | Dashboard totals tie to tested marts; filters and zero-denominator cases verified |
+| **6. GitHub Actions — hosted validation passed** | CI first; complete refresh pipeline next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
+| **7. Dashboard — Data + Sites implemented** | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Filters, chart design, metric definitions and source reconciliation | Warehouse-backed local refresh passed; hosted update remains |
 
-The current exercise is [milestone 6, lesson 1](docs/milestone_06.md): run the
-published workflow and learn how GitHub executes the existing checks.
+The current exercise is [one manual refresh](docs/manual_refresh.md):
+load all sources, build/test dbt, reconcile and export the local dashboard.
 Read the [project status](docs/project_status.md) for completed work, evidence
 and remaining scope. Earlier cloud uploads and Python refreshes are evidenced
 by user screenshots/SQL confirmations and prior live read-only checks.
@@ -137,7 +129,9 @@ The later lessons have added `src/ingestion/`, `scripts/`, `config/dbt/`, and
 and `requirements-dbt.txt` describe the separate environments.
 `.github/workflows/validate.yml` contains the manual validation workflow.
 `docs/milestone_06.md` explains automation; `docs/project_status.md` tracks remaining
-work. The Streamlit `dashboard/` is still future work.
+work. `dashboard-site/` implements the reporting UI; `sql/dashboard/` contains
+warehouse reconciliation queries and `scripts/reconcile_dashboard.py` compares
+them with the saved snapshot.
 
 ## Run milestone 1
 
@@ -147,7 +141,7 @@ the repository folder:
 ```bash
 source .venv/bin/activate
 python -m src.synthetic.validate
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests -p test_synthetic.py -v
 ```
 
 For a fresh clone, first run `python3 -m venv .venv`, activate it, then run:
@@ -184,8 +178,8 @@ python -m src.database.query --file sql/lessons/01_select.sql
 Follow [the SQL walkthrough](docs/milestone_02.md) one lesson at a time. It
 explains the statements, gives expected results and small exercises, and shows
 how to load a new database after cloning. No package installation is required.
-The complete test suite now includes 60 tests, including seventeen offline checks
-of the bulk-upload helper, six Pandas, ten Python loader, and eight API checks. Run the full suite with
+The complete Python suite now includes 73 tests, covering source controls,
+ingestion, API extraction, reconciliation and refresh failure handling. Run the full suite with
 `.venv-ingestion/bin/python -m unittest discover -s tests`; the original `.venv`
 has no Pandas. Offline checks do not establish successful cloud uploads.
 
@@ -198,10 +192,12 @@ are included; generated data, Python environments and local credentials are igno
 The full history was checked for common credential patterns before the first push;
 that check is not a guarantee against every possible secret format.
 
-The validation workflow is uploaded but its first hosted run is still pending.
+The first hosted validation run passed on commit `618ae46`. The expanded
+workflow in this update needs a new run; earlier success does not validate it.
 Open [Actions](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/workflows/validate.yml), choose **Run workflow**, select
 **main**, then click the green **Run workflow** button. Use your signed-in browser.
-It generates synthetic data, validates it and runs the Python suite; it does not
+It generates synthetic data, validates it, runs the Python suite and verifies
+the dashboard finance model against independent SQL totals. It does not
 refresh BigQuery. Pushing alone does not start this manually triggered workflow.
 
 The workflow uses a standard Ubuntu runner, with no artifact uploads or cache.

@@ -27,3 +27,12 @@ profiles.yml
 target/
 dbt_packages/
 logs/
+
+# Dashboard builds, reviewed snapshots, and private publication work.
+/work/
+/dashboard-site/dist/
+/dashboard-site/src/data.json
+/dashboard-site/.data-app-assets/
+/dashboard-site/.data-app-offline/
+/dashboard-site/node_modules/
+/dashboard-site/.openai/

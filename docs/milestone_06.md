@@ -9,8 +9,8 @@ can understand one run before enabling automatic triggers.
 
 **Current status:** code and the workflow are published to the public
 [portfolio repository](https://github.com/jmperry15-hash/saas-finance-data-platform-codex), as Jack explicitly chose.
-Local `main` tracks `origin/main`. GitHub execution remains pending: the agent's
-browser is signed out, so start the first run from your signed-in browser.
+Local `main` tracks `origin/main`. The user's screenshot confirms hosted run #1
+passed on commit `618ae46`. Newer local changes have not been tested on GitHub yet.
 This lesson does not refresh BigQuery or execute dbt against the warehouse.
 
 **Local verification, October 26:** in a temporary copy containing only tracked
@@ -43,10 +43,10 @@ If a command exits with an error, GitHub marks that step and job as failed;
 later ordinary steps do not run. A green result means these checks passed.
 It does not establish that warehouse data is current or that dbt models pass.
 
-## Your next action
+## Repeat the hosted exercise
 
-The repository has been created, connected and pushed. Start the first run in
-your signed-in GitHub browser using the steps below.
+The first run is complete. To repeat it, use the steps below in your signed-in
+GitHub browser. The current next lesson is [dashboard-to-warehouse reconciliation](dashboard_reconciliation.md).
 
 This repository is public and the workflow uses a standard Ubuntu runner, so
 runner usage is free under [GitHub's billing rules](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
@@ -59,20 +59,28 @@ data → Run workflow → main → Run workflow**. Open the run to inspect each
 step's log. The workflow must be on the default branch for the manual button
 to appear. See [GitHub's manual-run instructions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
 
-**Lesson gate:** one successful hosted run with source validation and all
-Python tests passing. Then we can demonstrate a deliberately failing run on
-a practice branch and fix it. Both hosted exercises are still pending.
+**Lesson gate passed:** one successful hosted validation run, evidenced by the
+user's screenshot. A deliberately failing run on a practice branch remains an
+optional exercise; automated negative tests already cover invalid inputs.
 
-## What follows
+## Lesson 2: the complete manual refresh
 
-1. Build a repeatable refresh command for all required raw sources. The
-   existing local Python loader refreshes only the GL; the initial bulk upload
-   is a separate utility.
-2. Run the dbt reporting models and tests after a successful refresh, with the
-   existing billing, location, expiration and query-size safeguards.
-3. Decide how to run that refresh remotely with short-lived authentication,
-   subject to free-tier support. Do not commit service-account key files.
-4. Verify one complete manual refresh before considering a schedule.
+[The refresh pipeline](manual_refresh.md) is implemented and its first complete
+live run passed on October 28: all 14 raw tables refreshed and verified,
+122 dbt steps passed, and the local dashboard rebuilt from 4,047 reconciled
+BigQuery rows. Billing remained disabled.
+
+Next, practice the command and inspect its receipt. Synchronizing the newer
+code to GitHub and publishing the updated private dashboard remain separate
+steps. Remote authentication and a schedule are optional extensions after
+understanding the manual pipeline.
 
 The previously skipped manual mock-API failure exercise remains optional;
 this milestone does not require reopening it.
+
+## Lesson 3: reproducible portfolio validation
+
+[The new lesson](portfolio_validation.md) extends the manual workflow to rebuild
+dashboard inputs in a temporary directory and verify the JavaScript calculations.
+It does not use cloud credentials or change the published Site. A new hosted run
+is needed to validate this commit; the first successful run covered older code.

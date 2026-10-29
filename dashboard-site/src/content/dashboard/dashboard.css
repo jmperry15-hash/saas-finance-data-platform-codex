@@ -1,0 +1,4 @@
+.page { --data-app-content-width: var(--data-app-dashboard-content-width); --data-app-layout-intent: standard; --data-app-layout-gutter: var(--data-app-dashboard-gutter); max-width: calc(var(--data-app-content-width) + 2 * var(--data-app-layout-gutter)); margin: 0 auto; padding-block: 0 64px; }
+.finance-scope { display:flex; flex-wrap:wrap; align-items:center; gap:8px 24px; color:var(--secondary); font-size:12px; line-height:1.6; margin: 4px 0 22px; }
+.finance-scope > :first-child {color:var(--text);font-weight:600;}
+.finance-back {font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;cursor:pointer;margin-bottom:12px;}

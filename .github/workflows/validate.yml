@@ -40,3 +40,9 @@ jobs:
 
       - name: Run Python tests (cloud calls are mocked)
         run: python -m unittest discover -s tests -v
+
+      - name: Check Node runtime supplied by the Ubuntu runner
+        run: node --version
+
+      - name: Rebuild and verify dashboard calculations (no cloud calls)
+        run: python scripts/check_dashboard_offline.py

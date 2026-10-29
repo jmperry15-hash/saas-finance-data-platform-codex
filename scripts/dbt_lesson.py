@@ -17,9 +17,23 @@ LOCATION = "us-south1"
 EXPIRATION_MS = 59 * 86400000
 
 
+def unbilled_credentials():
+    """Return ADC only after confirming this project's no-billing constraint."""
+    credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+    with AuthorizedSession(credentials) as session:
+        response = session.get(
+            f"https://cloudbilling.googleapis.com/v1/projects/{PROJECT}/billingInfo", timeout=30
+        )
+        response.raise_for_status()
+        billing = response.json()
+    if billing.get("billingEnabled") is not False or billing.get("billingAccountName"):
+        raise ValueError("Billing must be disabled with no linked account for this lesson.")
+    return credentials
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--lesson", choices=("departments", "pnl", "budget", "arr", "bookings", "workforce"), default="departments")
+    parser.add_argument("--lesson", choices=("departments", "pnl", "budget", "arr", "bookings", "workforce", "all"), default="departments")
     args = parser.parse_args()
     profile_dir = ROOT / "config/dbt"
     profile = profile_dir / "profiles.yml"
@@ -35,15 +49,7 @@ def main():
     if settings != {"target": "dev", "outputs": {"dev": expected}}:
         raise ValueError("Profile differs from this lesson's fixed destination and query limits.")
 
-    credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
-    with AuthorizedSession(credentials) as session:
-        response = session.get(
-            f"https://cloudbilling.googleapis.com/v1/projects/{PROJECT}/billingInfo", timeout=30
-        )
-        response.raise_for_status()
-        billing = response.json()
-    if billing.get("billingEnabled") is not False or billing.get("billingAccountName"):
-        raise ValueError("Billing must be disabled with no linked account for this lesson.")
+    credentials = unbilled_credentials()
 
     with bigquery.Client(project=PROJECT, credentials=credentials, location=LOCATION) as client:
         source = client.get_table(f"{PROJECT}.raw_shared.departments", timeout=30)
@@ -59,6 +65,9 @@ def main():
                 sources += ["raw_salesforce.bookings", "raw_salesforce.contracts", "raw_salesforce.opportunities"]
             if args.lesson == "workforce":
                 sources = ["raw_workday.employees", "raw_workday.employee_monthly", "raw_netsuite.gl_lines"]
+            if args.lesson == "all":
+                definitions = yaml.safe_load((ROOT / "dbt/models/staging/sources.yml").read_text())
+                sources = [f"{s['schema']}.{t['name']}" for s in definitions["sources"] for t in s["tables"]]
             for table_name in sources:
                 table = client.get_table(f"{PROJECT}.{table_name}", timeout=30)
                 if table.location != LOCATION or not table.num_rows:
@@ -84,7 +93,8 @@ def main():
                  "budget": "+fct_budget_vs_actual",
                  "arr": "+rpt_arr_monthly source:salesforce.customers",
                  "bookings": "+rpt_bookings_monthly source:salesforce.customers source:salesforce.contracts source:salesforce.opportunities",
-                 "workforce": "+rpt_workforce_monthly source:workday.employees"}[args.lesson]
+                 "workforce": "+rpt_workforce_monthly source:workday.employees",
+                 "all": "*"}[args.lesson]
     print(f"Billing disabled; sources and datasets checked. Building {args.lesson} lesson.", flush=True)
     subprocess.run([
         str(ROOT / ".venv-dbt/bin/dbt"), "build",
