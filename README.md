@@ -4,6 +4,14 @@
 A visual walkthrough of the business problem, architecture, dashboard screenshots,
 validation evidence and lessons learned. All financial data is synthetic.
 
+**[Open the interactive project guide](https://saas-finance-project-guide.jmperry41.chatgpt.site)**
+(private; sign in with the owner ChatGPT account). Explore the overview, all seven
+milestones, API practice, data flow, metric definitions, validation and downloads.
+The guide's [HTML/CSS/JavaScript source](project-guide/) is also available here.
+
+Download the current one-page data-flow infographic:
+[PDF](output/pdf/saas_finance_data_flow.pdf) · [PNG image](output/pdf/saas_finance_data_flow.png).
+
 **Verified October 28, 2026:** one manual command now validates and refreshes
 all 14 BigQuery raw tables, builds/tests dbt, reconciles 4,047 dashboard rows,
 and rebuilds the local Data + Sites dashboard from actual warehouse results.
