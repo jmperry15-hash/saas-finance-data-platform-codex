@@ -17,7 +17,7 @@ See [the manual refresh lesson](manual_refresh.md) and [dashboard documentation]
 | Mock API | 130 customers extracted across six pages; automated failure tests | HTTP/JSON, pagination, bounded retries, atomic file output |
 | dbt | 14 SQL models covering staging, P&L, BUD2025 comparison, ARR/customers, bookings and workforce | `source`, `ref`, dependency ordering, SQL views, data and unit tests, reconciliations |
 | Version control/security | Local Git history published to the user-approved public portfolio; ignored credentials and generated data; guarded cloud helpers | Git history, environments, ADC login, least privilege and cost controls |
-| GitHub Actions | User screenshot confirms hosted validation run #1 succeeded on commit `618ae46` | Fresh runner, YAML steps, dependencies, logs and automated tests |
+| GitHub Actions | Expanded hosted validation succeeded on application commit `614edb6`, including dashboard checks | Fresh runner, YAML steps, dependencies, logs and automated tests |
 | Dashboard | Data + Sites implementation; verified BigQuery export, model checks and browser review pass | Filters, reporting periods, ending balances versus flows, drilldowns and provenance |
 
 The complete October 28 dbt build passed: **14 views, 104 data tests, four unit
@@ -40,23 +40,22 @@ BigQuery SQL and the new query time. The private hosted website retains the
 October 27 snapshot; it was not republished. The portfolio synchronization checkpoint includes the dashboard and pipeline
 source plus reproducible offline dashboard checks. Its clean staged copy passed
 764 source controls, 73 Python tests and 186 dashboard comparisons on October 28,
-with Google credential paths disabled. The successful hosted GitHub run still
-applies to the earlier commit; the expanded workflow needs its own hosted run.
+with Google credential paths disabled. The expanded [hosted workflow](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/runs/40796000119)
+then passed on application commit `614edb6`, including dependency installation
+on Ubuntu, all 73 Python tests and all dashboard comparisons.
 
 ## Current learning step
 
 Follow [reproducible portfolio validation](portfolio_validation.md): inspect
-the new workflow, run it on GitHub, and find the dashboard comparison result.
+the successful GitHub workflow and find the dashboard comparison result.
 This tests the committed code without Google credentials. The manual cloud
 refresh and hosted dashboard publication are separate operations.
 
 ## Remaining core work
 
-1. **Hosted CI acceptance:** run the expanded validation workflow on this
-   portfolio checkpoint and confirm that exact commit passes on GitHub.
-2. **Hosted dashboard update:** publish the verified warehouse-backed snapshot
+1. **Hosted dashboard update:** publish the verified warehouse-backed snapshot
    to the same private Site and verify delivery.
-3. **Final learning acceptance:** have the user run the refresh, inspect its
+2. **Final learning acceptance:** have the user run the refresh, inspect its
    receipt and trace one metric. A second full live run can demonstrate
    idempotency; only one complete live run has been exercised so far.
 

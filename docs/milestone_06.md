@@ -10,7 +10,8 @@ can understand one run before enabling automatic triggers.
 **Current status:** code and the workflow are published to the public
 [portfolio repository](https://github.com/jmperry15-hash/saas-finance-data-platform-codex), as Jack explicitly chose.
 Local `main` tracks `origin/main`. The user's screenshot confirms hosted run #1
-passed on commit `618ae46`. Newer local changes have not been tested on GitHub yet.
+passed on commit `618ae46`. The expanded workflow also passed on `614edb6`
+on October 28; see Lesson 3 below.
 This lesson does not refresh BigQuery or execute dbt against the warehouse.
 
 **Local verification, October 26:** in a temporary copy containing only tracked
@@ -18,8 +19,8 @@ project files, generation and saved-file validation passed all 764 controls,
 and all 60 Python tests passed. Google credential paths were set to nonexistent
 temporary paths. The existing Python 3.13 ingestion environment passed
 `pip check`. Workflow YAML was also parsed and its trigger/permissions checked.
-This verifies the commands locally; installation and execution on GitHub's
-Linux runner remain pending.
+That was a local-only checkpoint. Hosted installation and execution have since
+passed; the latest receipt is in Lesson 3 below.
 
 Read [the workflow](../.github/workflows/validate.yml). YAML is a configuration
 format: indentation groups settings and steps. It is not SQL.
@@ -46,7 +47,7 @@ It does not establish that warehouse data is current or that dbt models pass.
 ## Repeat the hosted exercise
 
 The first run is complete. To repeat it, use the steps below in your signed-in
-GitHub browser. The current next lesson is [dashboard-to-warehouse reconciliation](dashboard_reconciliation.md).
+GitHub browser. The current lesson is [reproducible portfolio validation](portfolio_validation.md).
 
 This repository is public and the workflow uses a standard Ubuntu runner, so
 runner usage is free under [GitHub's billing rules](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
@@ -70,9 +71,9 @@ live run passed on October 28: all 14 raw tables refreshed and verified,
 122 dbt steps passed, and the local dashboard rebuilt from 4,047 reconciled
 BigQuery rows. Billing remained disabled.
 
-Next, practice the command and inspect its receipt. Synchronizing the newer
-code to GitHub and publishing the updated private dashboard remain separate
-steps. Remote authentication and a schedule are optional extensions after
+Next, practice the command and inspect its receipt. The newer code is now on
+GitHub with passing CI; publishing the updated private dashboard remains a
+separate step. Remote authentication and a schedule are optional extensions after
 understanding the manual pipeline.
 
 The previously skipped manual mock-API failure exercise remains optional;
@@ -82,5 +83,8 @@ this milestone does not require reopening it.
 
 [The new lesson](portfolio_validation.md) extends the manual workflow to rebuild
 dashboard inputs in a temporary directory and verify the JavaScript calculations.
-It does not use cloud credentials or change the published Site. A new hosted run
-is needed to validate this commit; the first successful run covered older code.
+It does not use cloud credentials or change the published Site. The [hosted run](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/runs/40796000119)
+passed on application commit `614edb6`: 764 source controls, 73 Python tests and
+186 dashboard comparisons plus coverage/plan assertions. No cloud credentials
+were used. Later documentation-only commits record this result; the tested
+application commit is identified explicitly.

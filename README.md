@@ -14,13 +14,13 @@ The foundation includes 14 synthetic source tables, SQLite SQL exercises,
 BigQuery raw data, Pandas GL ingestion, a paginated mock customer API, 14 dbt
 models, a successful hosted GitHub validation run, and a Data + Sites dashboard.
 The current local suite passes 73 Python tests; dashboard calculations pass 186
-comparisons plus coverage/plan assertions. The hosted GitHub run applies to the
-earlier published commit, not these newer local changes.
+comparisons plus coverage/plan assertions. [GitHub validation](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/runs/40796000119)
+passed on application commit `614edb6`, including the dashboard checks.
 
 This portfolio update adds reproducible dashboard checks to the manual GitHub
 workflow. Follow [the fresh-clone lesson](docs/portfolio_validation.md). The main
-remaining work is verifying CI for this update, updating the private hosted
-dashboard, and completing the user walkthrough. A schedule is optional. See the
+remaining work is updating the private hosted dashboard and completing the
+user walkthrough. A schedule is optional. See the
 [current project status](docs/project_status.md) for boundaries and evidence.
 
 ## Current architecture
@@ -81,7 +81,7 @@ Finish and understand each gate before starting the next milestone.
 | **3. BigQuery Sandbox — uploads and GL verified** | All 14 raw tables loaded; user confirmed GL SQL totals | Datasets, schemas, warehouse vs operational DB, dry runs | Row counts and GL pass; query-cost review and detailed finance checks remain |
 | **4. Python ingestion and API practice — core exercises verified** | Pandas and GL refresh/rerun; six-page customer extraction | Types, API responses, retries, idempotency, logging | Success path verified; manual failure practice skipped; API-to-warehouse integration deferred |
 | **5. dbt Core — core reporting built** | Staging views, P&L, BUD2025, ARR/customers, bookings and workforce | `ref`, `source`, grain, joins, window functions and tests | Lesson builds and reconciliations pass; optional retention and additional plan models deferred |
-| **6. GitHub Actions — hosted validation passed** | CI first; complete refresh pipeline next; schedule only if useful | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
+| **6. GitHub Actions — hosted validation passed** | Offline CI and complete manual refresh verified; schedule optional | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
 | **7. Dashboard — Data + Sites implemented** | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Filters, chart design, metric definitions and source reconciliation | Warehouse-backed local refresh passed; hosted update remains |
 
 The current exercise is [one manual refresh](docs/manual_refresh.md):
@@ -193,7 +193,8 @@ The full history was checked for common credential patterns before the first pus
 that check is not a guarantee against every possible secret format.
 
 The first hosted validation run passed on commit `618ae46`. The expanded
-workflow in this update needs a new run; earlier success does not validate it.
+workflow also [passed on `614edb6`](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/runs/40796000119)
+on October 28, including fresh dependency installation and dashboard checks.
 Open [Actions](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/workflows/validate.yml), choose **Run workflow**, select
 **main**, then click the green **Run workflow** button. Use your signed-in browser.
 It generates synthetic data, validates it, runs the Python suite and verifies

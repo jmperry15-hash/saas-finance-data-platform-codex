@@ -75,5 +75,7 @@ On October 28, a clean copy of the staged public files passed 764 source
 controls, all 73 Python tests, 186 dashboard comparisons, identity preservation
 and the local refresh preview. Credential paths pointed to nonexistent files.
 The check reused the installed Python environment, whose dependency check
-passed; GitHub still needs to verify installation on a fresh Linux runner.
+passed. [GitHub then passed the expanded workflow](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/runs/40796000119)
+on application commit `614edb6`, verifying fresh installation and execution on
+Ubuntu. Logs confirm 73 Python tests and 186 dashboard comparisons passed.
 The staged files passed a common-secret-pattern and private-path scan.
