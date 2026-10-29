@@ -72,8 +72,8 @@ live run passed on October 28: all 14 raw tables refreshed and verified,
 BigQuery rows. Billing remained disabled.
 
 Next, practice the command and inspect its receipt. The newer code is now on
-GitHub with passing CI; publishing the updated private dashboard remains a
-separate step. Remote authentication and a schedule are optional extensions after
+GitHub with passing CI. The updated private dashboard was separately published
+and verified on October 29. Continue with [the final walkthrough](final_walkthrough.md). Remote authentication and a schedule are optional extensions after
 understanding the manual pipeline.
 
 The previously skipped manual mock-API failure exercise remains optional;

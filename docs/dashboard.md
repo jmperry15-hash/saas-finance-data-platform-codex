@@ -1,13 +1,14 @@
 # Juniper Cloud dashboard
 
-Private Site: [Juniper Cloud Finance](https://juniper-finance-jack-2026.jmperry41.chatgpt.site). Published October 27, 2026; requires the owner’s ChatGPT sign-in.
+Private Site: [Juniper Cloud Finance](https://juniper-finance-jack-2026.jmperry41.chatgpt.site). Updated October 29, 2026 (version 3); requires the owner’s ChatGPT sign-in.
 
 The Data + Sites dashboard is implemented in `dashboard-site/`. As of October 28,
 the local version uses a snapshot exported from BigQuery after a complete manual
 refresh, independently reconciled against SQLite calculations from frozen CSVs.
 The browser reads that saved export, not live warehouse queries. See the
-[manual refresh lesson](manual_refresh.md). The private hosted version still uses
-the earlier October 27 SQLite-derived snapshot until it is republished.
+[manual refresh lesson](manual_refresh.md). Version 3 of the private hosted Site now serves that same BigQuery export.
+The export was generated October 28 at 6:31 PM Denver time; publication on
+October 29 did not rerun warehouse queries or extend the reporting periods.
 
 ## Coverage and use
 
@@ -70,3 +71,28 @@ Version 1 deployed successfully with source commit `d56f26f01c19ee0159b37534cdb9
 ## Light theme revision
 
 Version 2 (October 27, 2026) uses a fixed light original theme with white cards, pale gray backgrounds, dark text and muted blue/gray/charcoal chart series. Green/red remain reserved for favorable/unfavorable changes and the variance chart; ambiguous workforce changes remain neutral. Only theme tokens and chart color mappings changed. Snapshot and model SHA-256 fingerprints are unchanged. All three tabs were visually reviewed at the current narrow browser width, with no page overflow or console errors. Hosted asset readback verified all 4,047 rows. Source commit: `aa40b13f3502e54f37ad0eabe9c5d210e1942b13`.
+
+## Warehouse export publication — October 29
+
+Version 3 deployed successfully from Site source commit
+`c07f6330921d476d1c28f9f09e13b0cc974d5305`. It preserves the Site, app ID,
+database, saved presentation revision 1 and owner-only access (no external
+visitors or groups). Source code corresponds to portfolio revision `78e8b86`.
+
+Complete hosted readback matched all 4,047 rows across four queries and the
+compiled HTML. Snapshot SHA-256:
+`75537f8d6894fb357e0ae50b1be1f5d6b0ef54e4882b741545f8a8567de0d16b`.
+Hosted HTML SHA-256:
+`54a0e40735cb9e5e5e2b16f75b768b98f5056019ec047700f9219fb350c10832`.
+
+All three hosted tabs rendered, browser console error logs were empty, and
+Revenue's source inspector showed the executed BigQuery SQL and extraction
+time. This verified viewing and source inspection; editing permissions were
+not exercised. No Google credentials were published or BigQuery jobs run.
+
+The exact preserved local compiled build was restored after publication so the
+local preview continues to load; no client rebuild or hosted archive change was
+needed. Non-secret receipts and browser screenshots are under the ignored
+`work/sites-oct29-*` and `work/hosted-oct29/` paths.
+
+Continue with [the final metric walkthrough](final_walkthrough.md).

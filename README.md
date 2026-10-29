@@ -19,8 +19,8 @@ passed on application commit `614edb6`, including the dashboard checks.
 
 This portfolio update adds reproducible dashboard checks to the manual GitHub
 workflow. Follow [the fresh-clone lesson](docs/portfolio_validation.md). The main
-remaining work is updating the private hosted dashboard and completing the
-user walkthrough. A schedule is optional. See the
+remaining step is [the user metric walkthrough](docs/final_walkthrough.md).
+The private hosted dashboard was updated and verified on October 29. A schedule is optional. See the
 [current project status](docs/project_status.md) for boundaries and evidence.
 
 ## Current architecture
@@ -40,7 +40,8 @@ flowchart LR
 
 
 The local dashboard uses the saved warehouse export from the manual pipeline.
-The private hosted website still has its previous snapshot until republished.
+The private hosted website was updated October 29 with the same verified export.
+Its data extraction timestamp remains October 28; browsing does not query BigQuery.
 
 Python extracts and loads source data; dbt applies business transformations in
 the warehouse. That is **ELT**: extract, load, then transform. Small Python cleanup
@@ -82,7 +83,7 @@ Finish and understand each gate before starting the next milestone.
 | **4. Python ingestion and API practice — core exercises verified** | Pandas and GL refresh/rerun; six-page customer extraction | Types, API responses, retries, idempotency, logging | Success path verified; manual failure practice skipped; API-to-warehouse integration deferred |
 | **5. dbt Core — core reporting built** | Staging views, P&L, BUD2025, ARR/customers, bookings and workforce | `ref`, `source`, grain, joins, window functions and tests | Lesson builds and reconciliations pass; optional retention and additional plan models deferred |
 | **6. GitHub Actions — hosted validation passed** | Offline CI and complete manual refresh verified; schedule optional | YAML, permissions, logs, short-lived authentication | Deliberately bad input fails CI; good manual refresh succeeds within free allowances |
-| **7. Dashboard — Data + Sites implemented** | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Filters, chart design, metric definitions and source reconciliation | Warehouse-backed local refresh passed; hosted update remains |
+| **7. Dashboard — Data + Sites implemented** | P&L/BvA, ARR/bookings/customers, workforce, spending, variance drivers | Filters, chart design, metric definitions and source reconciliation | Warehouse-backed local refresh and private hosted update verified |
 
 The current exercise is [one manual refresh](docs/manual_refresh.md):
 load all sources, build/test dbt, reconcile and export the local dashboard.

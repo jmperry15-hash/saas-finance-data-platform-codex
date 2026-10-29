@@ -1,4 +1,4 @@
-# Project status — October 28, 2026
+# Project status — October 29, 2026
 
 The manual refresh pipeline now connects all fourteen synthetic sources to
 BigQuery, dbt, and the local Data + Sites dashboard. The first complete live run
@@ -36,8 +36,9 @@ inputs, job IDs, dbt logs/results, executed SQL and returned reporting rows.
 Billing was checked live: disabled, with no linked account.
 
 All three local dashboard tabs rendered after refresh. Source inspection showed
-BigQuery SQL and the new query time. The private hosted website retains the
-October 27 snapshot; it was not republished. The portfolio synchronization checkpoint includes the dashboard and pipeline
+BigQuery SQL and the new query time. On October 29 the same warehouse-backed
+snapshot was published as private Site version 3. Complete HTML/data readback,
+all three hosted views and saved presentation preservation passed. The portfolio synchronization checkpoint includes the dashboard and pipeline
 source plus reproducible offline dashboard checks. Its clean staged copy passed
 764 source controls, 73 Python tests and 186 dashboard comparisons on October 28,
 with Google credential paths disabled. The expanded [hosted workflow](https://github.com/jmperry15-hash/saas-finance-data-platform-codex/actions/runs/40796000119)
@@ -46,16 +47,13 @@ on Ubuntu, all 73 Python tests and all dashboard comparisons.
 
 ## Current learning step
 
-Follow [reproducible portfolio validation](portfolio_validation.md): inspect
-the successful GitHub workflow and find the dashboard comparison result.
-This tests the committed code without Google credentials. The manual cloud
-refresh and hosted dashboard publication are separate operations.
+Follow [the final metric walkthrough](final_walkthrough.md): trace Revenue
+from the hosted dashboard through its BigQuery query and dbt model. The core
+prototype is implemented; user learning acceptance remains.
 
 ## Remaining core work
 
-1. **Hosted dashboard update:** publish the verified warehouse-backed snapshot
-   to the same private Site and verify delivery.
-2. **Final learning acceptance:** have the user run the refresh, inspect its
+1. **Final learning acceptance:** have the user run the refresh, inspect its
    receipt and trace one metric. A second full live run can demonstrate
    idempotency; only one complete live run has been exercised so far.
 
