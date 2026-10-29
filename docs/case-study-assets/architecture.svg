@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1010" viewBox="0 0 1000 1010" role="img" aria-labelledby="title desc">
+<title id="title">SaaS finance platform architecture</title>
+<desc id="desc">Synthetic sources flow through Python, BigQuery, dbt, a verified export and a local dashboard. SQLite independently checks the export. Hosting is a separate publication step. GitHub Actions runs offline tests.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315f8c"/></marker></defs>
+<rect width="1000" height="1010" rx="16" fill="#f5f7fb"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#162c43">
+<text x="40" y="48" font-size="28" font-weight="700">From source records to finance reporting</text>
+<text x="40" y="78" font-size="17" fill="#526579">Implemented workflow · Synthetic data only · October 2026</text>
+<g fill="white" stroke="#c8d5e3" stroke-width="1.5">
+<rect x="40" y="110" width="920" height="100" rx="12"/>
+<rect x="40" y="250" width="580" height="100" rx="12"/>
+<rect x="670" y="250" width="290" height="130" rx="12"/>
+<rect x="40" y="390" width="580" height="100" rx="12"/>
+<rect x="40" y="530" width="580" height="100" rx="12"/>
+<rect x="40" y="670" width="580" height="100" rx="12"/>
+<rect x="40" y="810" width="580" height="100" rx="12"/>
+<rect x="670" y="810" width="290" height="100" rx="12"/>
+<rect x="670" y="465" width="290" height="140" rx="12"/>
+</g>
+<g stroke="#315f8c" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+<path d="M330 210V250"/><path d="M330 350V390"/><path d="M330 490V530"/><path d="M330 630V670"/><path d="M330 770V810"/>
+<path d="M815 210V250"/><path d="M620 860H670"/>
+<path d="M815 380V420H980V720H620" stroke-dasharray="7 5"/>
+</g>
+<g font-size="22" font-weight="700">
+<text x="64" y="145">1  Synthetic source exports</text>
+<text x="64" y="285">2  Python validation + batch loads</text>
+<text x="64" y="425">3  BigQuery raw datasets</text>
+<text x="64" y="565">4  dbt Core transformations</text>
+<text x="64" y="705">5  Verified warehouse export</text>
+<text x="64" y="845">6  Local Data + Sites dashboard</text>
+<text x="690" y="285" font-size="21">Independent SQLite</text>
+<text x="690" y="500" font-size="21">GitHub + Actions</text>
+<text x="690" y="845" font-size="21">Private hosted Site</text>
+</g>
+<g font-size="18" fill="#526579">
+<text x="64" y="175">NetSuite · Salesforce · Workday · Pigment · Shared departments</text>
+<text x="64" y="197" font-size="16">14 CSV tables / 24 months / 23,794 rows / shared IDs and integer cents</text>
+<text x="64" y="315">Freeze inputs, validate, then replace each raw table</text>
+<text x="690" y="316">Same frozen source batch</text>
+<text x="690" y="344">Separate SQL calculations</text>
+<text x="64" y="455">Explicit schemas · field-for-field source verification</text>
+<text x="64" y="595">Staging → finance views · 104 data + 4 unit tests</text>
+<text x="64" y="735">4 queries / 4,047 rows · exact SQLite reconciliation</text>
+<text x="64" y="875">P&amp;L + budget · ARR + bookings · workforce</text>
+<text x="690" y="875">Separate publication step</text>
+<text x="690" y="529">Versioned code + manual CI</text>
+<text x="690" y="556">Offline Python + UI math tests</text>
+<text x="690" y="583" font-weight="700">No warehouse refresh</text>
+<text x="690" y="750" font-size="16">Dashed path: independent check</text>
+<text x="40" y="951" font-size="18" font-weight="700">Manual refresh runs steps 2–6. Hosting is updated separately.</text>
+<text x="40" y="981" font-size="17">Dashboard filters read the saved export; they do not issue live BigQuery queries.</text>
+</g></g></svg>

@@ -49,13 +49,17 @@ on Ubuntu, all 73 Python tests and all dashboard comparisons.
 
 Follow [the final metric walkthrough](final_walkthrough.md): trace Revenue
 from the hosted dashboard through its BigQuery query and dbt model. The core
-prototype is implemented; user learning acceptance remains.
+prototype is implemented. The user chose to skip the repeat-refresh exercise;
+the metric walkthrough remains available as optional practice.
 
-## Remaining core work
+The [portfolio case study](case_study.md) explains the implementation with
+dashboard screenshots, a current architecture diagram and validation evidence.
 
-1. **Final learning acceptance:** have the user run the refresh, inspect its
-   receipt and trace one metric. A second full live run can demonstrate
-   idempotency; only one complete live run has been exercised so far.
+## Optional final practice
+
+1. Run the refresh, inspect its receipt and trace one metric. A second full live
+   run can demonstrate idempotency; only one complete live run has been exercised
+   so far. The repeat run was skipped at the user's request.
 
 Missing-table recreation, timeout behavior, concurrent-run rejection and
 failed-build rollback passed offline tests. Live recovery was not tested by

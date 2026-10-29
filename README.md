@@ -1,5 +1,9 @@
 # Miniature SaaS Finance Data Platform
 
+**[Read the portfolio case study →](docs/case_study.md)**
+A visual walkthrough of the business problem, architecture, dashboard screenshots,
+validation evidence and lessons learned. All financial data is synthetic.
+
 **Verified October 28, 2026:** one manual command now validates and refreshes
 all 14 BigQuery raw tables, builds/tests dbt, reconciles 4,047 dashboard rows,
 and rebuilds the local Data + Sites dashboard from actual warehouse results.
